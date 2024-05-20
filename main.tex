@@ -1,0 +1,2805 @@
+\documentclass{tex/note}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{bm}
+
+\title{Raking}
+\author{}
+
+\begin{document}
+
+\maketitle
+
+\section{General definition of the raking problem}
+
+We have a population $\mathcal{U} = \left\{ 1 , \cdots , n, \cdots , N \right\}$. We are interested in the variable $X$ which takes the values $x_n$ and we want to estimate the sum:
+
+\begin{equation*}
+\mathcal{X} = \sum_{n = 1}^N x_n
+\end{equation*}
+
+To do this, we select a sample $S \subset \mathcal{U}$ and we suppose that we know the values of the $x_n , n \in S$. If we denote $\pi_n$ the probability of having $n \in S$ and $d_n = \frac{1}{\pi_n}$, an estimator for $\mathcal{X}$ is:
+
+\begin{equation*}
+\hat{\mathcal{X}} = \sum_{n \in S} \frac{x_n}{\pi_n} = \sum_{n \in S} d_n x_n
+\end{equation*}
+
+\paragraph{Note}In practice, we will often have $S = \mathcal{U}$, $\pi_n = 1$ and $d_n = 1$, but we write the formulation with $S$ instead of $\mathcal{U}$ to keep the generality and be able to use the same formulation of the problem if one value is missing for instance.
+
+\vspace{1em}
+
+For the raking problem, we are going to introduce $M$ auxiliary variables and we define the vectors $\bm{y}_n = \left( y_{n,1} , \cdots , y_{n,m} , \cdots , y_{n,M} \right) ^T$ for $n = 1 , \cdots , N$. We suppose that the vector:
+
+\begin{equation*}
+\sum_{n = 1}^N \bm{y}_n = \bm{y} = \left( y_1 , \cdots , y_m , \cdots , y_M \right)^T
+\end{equation*}
+
+is known, but we do not necessarily know the $\bm{y}_n$ for all $n = 1, \cdots , N$. We want to find the raking estimator:
+
+\begin{equation*}
+\hat{\mathcal{X}}_{raking}  = \sum_{n \in S} \alpha_n x_n  
+\end{equation*}
+    
+with the constraints:
+
+\begin{equation*}
+\sum_{n \in S} \alpha_n \bm{y}_n = \sum_{n = 1}^N \bm{y}_n = \bm{y}
+\end{equation*}
+
+If we have only one categorical variable and the $x_n , n = 1 , \cdots , N$ can be written as $x_i , i = 1 , \cdots , I$ with $n = i$ and $N = I$, there is only $M = 1$ auxiliary variable. We can write the vector $\bm{y}_n = x_i$ and the constraint as:
+
+\begin{equation*}
+\sum_{i \in S} \alpha_i x_i = y_1 = \mu
+\end{equation*}
+
+If we have two categorical variables and the $x_n , n = 1 , \cdots , N$ can be written as $x_{i,j} , i = 1 , \cdots , I, j = 1 , \cdots , J$ with $n = \left(j-1\right) I + i$ and $N = I * J$, there are $M = I + J$ auxiliary variables. We can write the vector $\bm{y}_n = \left( y_{n,1} , \cdots , y_{n,I} , y_{n,I+1} \cdots , y_{n,I+J} \right) ^T$ and the constraints as:
+
+\begin{align*}
+\sum_{n \in S} \alpha_n y_{n,i} &= y_i = \mu_{i.} \text{ for } i = 1 , \cdots , I \\
+\sum_{n \in S} \alpha_n y_{n,I + j} &= y_{I + j} = \mu_{.j} \text{ for } j = 1 , \cdots , J
+\end{align*}
+
+The first $I$ constraints can be written as:
+
+\begin{align*}
+y_{n,i} &= x_{i,j} \text{ if } n \in \left\{ i , I + i , \cdots , \left(J-1\right) I + i \right\} \\
+&= 0 \text{ elsewhere}
+\end{align*}
+
+The next $J$ constraints can be written as:
+
+\begin{align*}
+y_{n,I+j} &= x_{i,j} \text{ if } n \in \left\{ \left(j-1\right) I + 1 , \left(j-1\right) I + i , \cdots , \left(j-1\right) I + I \right\} \\
+&= 0 \text{ elsewhere}
+\end{align*}
+
+If we denote $\alpha_{i,j} = \alpha_n = \alpha_{\left(j-1\right) I + i}$, the first set of $I$ constraints become:
+
+\begin{equation*}
+\sum_{\substack{j = 1 \\ \left(i,j\right) \in S}}^J \alpha_{\left(j-1\right) I + i} y_{\left(j-1\right) I + i,i} = \sum_{\substack{j = 1 \\ \left(i,j\right) \in S}}^J \alpha_{i,j} x_{i,j} = y_i = \mu_{i.} \text{ for } i = 1 , \cdots , I
+\end{equation*}
+
+and the second set of $J$ constraints become:
+
+\begin{equation*}
+\sum_{\substack{i = 1 \\ \left(i,j\right) \in S}}^I \alpha_{\left(j-1\right) I + i} y_{\left(j-1\right) I + i,I + j} = \sum_{\substack{i = 1 \\ \left(i,j\right) \in S}}^I \alpha_{i,j} x_{i,j} = y_{I + j} = \mu_{.j} \text{ for } j = 1 , \cdots , J
+\end{equation*}
+
+Our objective is to find the weights $\alpha_n$ close to the $d_n$ which respect the constraints:
+
+\begin{equation*}
+\sum_{n \in S} \alpha_n \bm{y}_n = \sum_{n = 1}^N \bm{y}_n = \bm{y}
+\end{equation*}
+
+For this, we need to define a distance $G \left( \alpha_n , d_n \right)$. We suppose that $G \left( . , d_n \right)$ is positive, derivable and strictly convex such that $G \left( d_n , d_n \right) = 0$. We obtain the weights $\alpha_n, n \in S$ by minimizing:
+
+\begin{equation*}
+\sum_{n \in S} \frac{G \left( \alpha_n , d_n \right)}{q_n}
+\end{equation*}
+
+where the $q_n$ are coefficients which allow us to give more importance to some of the observations (e.g. they could be a function of the uncertainties $\sigma_n$).
+
+\vspace{1em}
+
+We can write the Lagrangian:
+
+\begin{equation*}
+\mathcal{L} \left( \alpha_n , n \in S , \lambda_m , m = 1 , \cdots , M \right) = \sum_{n \in S} \frac{G \left( \alpha_n , d_n \right)}{q_n} + \bm{\lambda}^T \left( \sum_{n \in S} \alpha_n \bm{y}_n - \bm{y} \right)
+\end{equation*}
+
+If we write that the partial derivatives with respect to the $\alpha_n$ are equal to $0$, we get:
+
+\begin{equation*}
+\frac{\partial \mathcal{L} \left( \alpha_n , n \in S , \lambda_m , m = 1 , \cdots , M \right)}{\partial \alpha_n} = \frac{g \left( \alpha_n , d_n \right)}{q_n} + \bm{\lambda}^T \bm{y}_n = 0
+\end{equation*}
+
+where:
+
+\begin{equation*}
+g \left( \alpha_n , d_n \right) = \frac{\partial G \left( \alpha_n , d_n \right)}{\partial \alpha_n}
+\end{equation*}
+
+If we denote $d_n F \left( . \right)$ the inverse function of $g \left( . , d_n \right)$ (that is $d_n F \left( u \right) = v$ if $ g \left( v , d_n \right) = u$), we get the weights:
+
+\begin{equation*}
+\alpha_n = d_n F \left( - q_n \bm{\lambda}^T \bm{y}_n \right)
+\end{equation*}
+
+Using the constraints, we get:
+
+\begin{equation*}
+\sum_{n \in S} d_n F \left( - q_n \bm{\lambda}^T \bm{y}_n \right) \bm{y}_n = \bm{y}
+\end{equation*}
+
+We need to solve this last equation for $\bm{\lambda}$ to get the final values of the raking weights.
+
+\section{1-dimensional raking}
+
+In this section, instead of computing the raking weights $\alpha_i$, we compute the raked values $\mu_i$. That will make it easier to add a condition $0 < \mu_i < 1$ on the raked values if we are interested in prevalence. Our objective is then to find the $\mu_i$ that minimize:
+
+\begin{equation*}
+\sum_{i = 1}^I \frac{G \left( \mu_i , x_i \right)}{q_i}
+\end{equation*}
+
+under the constraint:
+
+\begin{equation*}
+\bm{v}^T \bm{\mu} = \sum_{i = 1}^I v_i \mu_i = \mu
+\end{equation*}
+
+\subsection{Chi-square distance}
+
+We take:
+
+\begin{equation*}
+G \left( \mu , x \right) = \frac{1}{2 x} \left( \mu - x \right) ^2 \text{ and } g \left( \mu , x \right) = \frac{\partial G \left( \mu , x \right)}{\partial \mu} = \frac{\mu}{x} - 1
+\end{equation*}
+
+\subsubsection{Primal problem}
+
+We can write the Lagrangian:
+
+\begin{equation*}
+\mathcal{L} \left( \bm{\mu} , \lambda \right) = \sum_{i = 1}^I \frac{1}{2 q_i x_i} \left( \mu_i - x_i \right) ^2 + \lambda \left( \bm{v}^T \bm{\mu} - \mu \right)
+\end{equation*}
+
+If we write that the partial derivatives with respect to the $\mu_i$ are equal to $0$, we get:
+
+\begin{equation*}
+\frac{\partial \mathcal{L} \left( \bm{\mu} , \lambda \right)}{\partial \mu_i} =  \frac{1}{q_i} \left( \frac{\mu_i}{x_i} - 1 \right) + \lambda v_i = 0
+\end{equation*}
+
+\textbf{First method: $1$ unknown $\lambda$}
+
+We get the raked values:
+
+\begin{equation*}
+\mu_i = x_i \left( 1 - q_i v_i \lambda \right)
+\end{equation*}
+
+Using the constraint, we get:
+
+\begin{equation*}
+\sum_{i = 1}^I v_i x_i \left( 1 - q_i v_i \lambda \right) = \mu
+\end{equation*}
+
+which gives us directly:
+
+\begin{equation*}
+\lambda = \frac{\sum_{i = 1}^I v_i x_i - \mu}{\sum_{i = 1}^I q_i v_i^2 x_i}
+\end{equation*}
+
+\textbf{Second method: $I + 1$ unknowns $\bm{\mu}$ and $\lambda$}
+
+We can also write the problem as a system of $I + 1$ linear equations:
+
+\begin{align*}
+\frac{\mu_1}{q_1 x_1} - \frac{1}{q_1} + v_1 \lambda &= 0 \\
+\cdots & \\
+\frac{\mu_I}{q_I x_I} - \frac{1}{q_I} + v_I \lambda &= 0 \\
+\bm{v}^T \bm{\mu} &= \mu
+\end{align*}
+
+which can be re-written as:
+
+\begin{equation*}
+\begin{pmatrix} \frac{1}{q_1 x_1} & 0 & \hdots & 0 & v_1 \\ 0 & \ddots & \ddots & \vdots & \vdots \\ \vdots & \ddots & \ddots & 0 & \vdots \\ 0 & \hdots & 0 & \frac{1}{q_I x_I} & v_I \\ v_1 & \hdots & \hdots & v_I & 0 \end{pmatrix} \begin{pmatrix} \mu_1 \\ \vdots \\ \vdots \\ \mu_I \\ \lambda \end{pmatrix} = \begin{pmatrix} \frac{1}{q_1} \\ \vdots \\ \vdots \\ \frac{1}{q_I} \\ \mu \end{pmatrix}
+\end{equation*}
+
+\subsubsection{Dual problem}
+
+Another way of solving this problem is to write the dual problem:
+
+\begin{align*}
+& \min_{\bm{\mu}} \sup_{\lambda} \sum_{i = 1}^I \frac{\left( \mu_i - x_i \right)^2}{2 q_i x_i} + \lambda \left( \bm{v}^T \bm{\mu} - \mu \right) \geq \\
+& \sup_{\lambda} - \lambda \mu - \sup_{\bm{\mu}} \sum_{i = 1}^I - \mu_i v_i \lambda - \frac{\left( \mu_i - x_i \right)^2}{2 q_i x_i} = \\
+& \sup_{\lambda} - \lambda \mu - \sum_{i = 1}^I f_i^* \left( - v_i \lambda \right)
+\end{align*}
+
+where:
+
+\begin{equation*}
+f^* \left( z \right) = \sup_{\mu} \mu z - \frac{\left( \mu - x \right)^2}{2 q x}
+\end{equation*}
+
+Taking the derivative of $f^*$ with respect to $\mu$, we get:
+
+\begin{equation*}
+\frac{\partial f^* \left( z \right)}{\partial \mu} = 0 = z - \frac{ \left( \mu - x \right)}{q x}
+\end{equation*}
+
+which gives us:
+
+\begin{equation*}
+\mu = x \left( 1 + q z \right)
+\end{equation*}
+
+and:
+
+\begin{equation*}
+f^* \left( z \right) = x z \left( 1 + \frac{q z}{2} \right)
+\end{equation*}
+
+Its derivative is:
+
+\begin{equation*}
+f^{* \left( 1 \right)} \left( z \right) = x \left( 1 + q z \right)
+\end{equation*}
+
+The dual can then be written as a minimization problem:
+
+\begin{equation*}
+\min_\lambda \lambda \mu + \sum_{i = 1}^I f_i^* \left( - v_i \lambda \right)
+\end{equation*}
+
+Taking the derivative with respect to $\lambda$, we have:
+
+\begin{equation*}
+\mu = \sum_{i = 1}^I v_i f_i^{* \left( 1 \right)} \left( - v_i \lambda \right) = \sum_{i = 1}^I v_i x_i \left( 1 - q_i v_i \lambda \right)
+\end{equation*}
+
+which immediately gives us:
+
+\begin{equation*}
+\mu_i = f_i^{* \left( 1 \right)} \left( - v_i \lambda \right) = x_i \left( 1 - q_i v_i \lambda \right)
+\end{equation*}
+
+that is we get back to the solution of the primal problem.
+
+\subsection{$\mathcal{L}_2$ distance}
+
+We take:
+
+\begin{equation*}
+G \left( \mu , x \right) = \frac{1}{2} \left( \mu - x \right) ^2 \text{ and } g \left( \mu , x \right) = \frac{\partial G \left( \mu , x \right)}{\partial \mu} = \mu - x
+\end{equation*}
+
+\subsubsection{Primal problem}
+
+We can write the Lagrangian:
+
+\begin{equation*}
+\mathcal{L} \left( \bm{\mu} , \lambda \right) = \sum_{i = 1}^I \frac{1}{2 q_i} \left( \mu_i - x_i \right) ^2 + \lambda \left( \bm{v}^T \bm{\mu} - \mu \right)
+\end{equation*}
+
+If we write that the partial derivatives with respect to the $\mu_i$ are equal to $0$, we get:
+
+\begin{equation*}
+\frac{\partial \mathcal{L} \left( \bm{\mu} , \lambda \right)}{\partial \mu_i} =  \frac{1}{q_i} \left( \mu_i - x_i \right) + \lambda v_i = 0
+\end{equation*}
+
+\textbf{First method: $1$ unknown $\lambda$}
+
+We get the raked values:
+
+\begin{equation*}
+\mu_i = x_i - q_i v_i \lambda
+\end{equation*}
+
+Using the constraint, we get:
+
+\begin{equation*}
+\sum_{i = 1}^I v_i \left( x_i - q_i v_i \lambda \right) = \mu
+\end{equation*}
+
+which gives us directly:
+
+\begin{equation*}
+\lambda = \frac{\sum_{i = 1}^I v_i x_i - \mu}{\sum_{i = 1}^I q_i v_i^2}
+\end{equation*}
+
+\textbf{Second method: $I + 1$ unknowns $\bm{\mu}$ and $\lambda$}
+
+We can also write the problem as a system of $I + 1$ linear equations:
+
+\begin{align*}
+\frac{\mu_1 - x_1}{q_1} + v_1 \lambda &= 0 \\
+\cdots & \\
+\frac{\mu_I - x_I}{q_I} + v_I \lambda &= 0 \\
+\bm{v}^T \bm{\mu} &= \mu
+\end{align*}
+
+which can be re-written as:
+
+\begin{equation*}
+\begin{pmatrix} \frac{1}{q_1} & 0 & \hdots & 0 & v_1 \\ 0 & \ddots & \ddots & \vdots & \vdots \\ \vdots & \ddots & \ddots & 0 & \vdots \\ 0 & \hdots & 0 & \frac{1}{q_I} &  v_I \\ v_1 & \hdots & \hdots & v_I & 0 \end{pmatrix} \begin{pmatrix} \mu_1 \\ \vdots \\ \vdots \\ \mu_I \\ \lambda \end{pmatrix} = \begin{pmatrix} \frac{x_1}{q_1} \\ \vdots \\ \vdots \\ \frac{x_I}{q_I} \\ \mu \end{pmatrix}
+\end{equation*}
+
+\subsubsection{Dual problem}
+
+Another way of solving this problem is to write the dual problem:
+
+\begin{align*}
+& \min_{\bm{\mu}} \sup_{\lambda} \sum_{i = 1}^I \frac{\left( \mu_i - x_i \right)^2}{2 q_i} + \lambda \left( \bm{v}^T \bm{\mu} - \mu \right) \geq \\
+& \sup_{\lambda} - \lambda \mu - \sup_{\bm{\mu}} \sum_{i = 1}^I - \mu_i v_i \lambda - \frac{\left( \mu_i - x_i \right)^2}{2 q_i} = \\
+& \sup_{\lambda} - \lambda \mu - \sum_{i = 1}^I f_i^* \left( - v_i \lambda \right)
+\end{align*}
+
+where:
+
+\begin{equation*}
+f^* \left( z \right) = \sup_{\mu} \mu z - \frac{\left( \mu - x \right)^2}{2 q}
+\end{equation*}
+
+Taking the derivative of $f^*$ with respect to $\mu$, we get:
+
+\begin{equation*}
+\frac{\partial f^* \left( z \right)}{\partial \mu} = 0 = z - \frac{ \left( \mu - x \right)}{q}
+\end{equation*}
+
+which gives us:
+
+\begin{equation*}
+\mu = x + q z
+\end{equation*}
+
+and:
+
+\begin{equation*}
+f^* \left( z \right) = z \left( x + \frac{q z}{2} \right)
+\end{equation*}
+
+Its derivative is:
+
+\begin{equation*}
+f^{* \left( 1 \right)} \left( z \right) = x + q z
+\end{equation*}
+
+The dual can then be written as a minimization problem:
+
+\begin{equation*}
+\min_\lambda \lambda \mu + \sum_{i = 1}^I f_i^* \left( - v_i \lambda \right)
+\end{equation*}
+
+Taking the derivative with respect to $\lambda$, we have:
+
+\begin{equation*}
+\mu = \sum_{i = 1}^I v_i f_i^{* \left( 1 \right)} \left( - v_i \lambda \right) = \sum_{i = 1}^I v_i \left( x_i - q_i v_i \lambda \right)
+\end{equation*}
+
+which immediately gives us:
+
+\begin{equation*}
+\mu_i = f_i^{* \left( 1 \right)} \left( - v_i \lambda \right) = x_i - q_i v_i \lambda
+\end{equation*}
+
+that is we get back to the solution of the primal problem.
+
+\subsection{Entropic distance}
+
+We take:
+
+\begin{equation*}
+G \left( \mu , x \right) = \mu \log \left( \frac{\mu}{x} \right) - \mu + x \text{ and } g \left( \mu , x \right) = \frac{\partial G \left( \mu , x \right)}{\partial \mu} = \log \left( \frac{\mu}{x} \right)
+\end{equation*}
+
+\subsubsection{Primal problem}
+
+We can write the Lagrangian:
+
+\begin{equation*}
+\mathcal{L} \left( \bm{\mu} , \lambda \right) = \sum_{i = 1}^I \frac{1}{q_i} \left( \mu_i \log \left( \frac{\mu_i}{x_i} \right) - \mu_i + x_i \right) + \lambda \left( \bm{v}^T \bm{\mu} - \mu \right)
+\end{equation*}
+
+If we write that the partial derivatives with respect to the $\mu_i$ are equal to $0$, we get:
+
+\begin{equation*}
+\frac{\partial \mathcal{L} \left( \bm{\mu} , \lambda \right)}{\partial \mu_i} = \frac{1}{q_i} \log \left( \frac{\mu_i}{x_i} \right) + \lambda v_i = 0
+\end{equation*}
+
+\textbf{First method: $1$ unknown $\lambda$}
+
+We get the raked values:
+
+\begin{equation*}
+\mu_i = x_i \exp \left( - q_i v_i \lambda \right)
+\end{equation*}
+
+Using the constraint, we get:
+
+\begin{equation*}
+\sum_{i = 1}^I v_i x_i \exp \left( - q_i v_i \lambda \right) = \mu
+\end{equation*}
+
+We use Newton's method to solve this last equation for $\lambda$. We start at $\lambda^0 = 0$ and we iterate:
+
+\begin{equation*}
+\lambda^{k + 1} = \lambda^k - \frac{\mu - \sum_{i = 1}^I v_i x_i \exp \left( - q_i v_i \lambda^k \right)}{\sum_{i = 1}^I q_i v_i^2 x_i \exp \left( - q_i v_i \lambda^k \right)}
+\end{equation*}
+
+In the special case where $v_i = 1$ and $q_i = 1$, we get:
+
+\begin{equation*}
+\mu_i = x_i \frac{\mu}{\sum_{i = 1}^n x_i}
+\end{equation*}
+
+\textbf{Second method: $I + 1$ unknowns $\bm{\mu}$ and $\lambda$}
+
+We can also write the problem as a system of $I + 1$ linear equations:
+
+\begin{align*}
+\frac{1}{q_1} \log \left( \frac{\mu_1}{x_1} \right) + v_1 \lambda &= 0 \\
+\cdots & \\
+\frac{1}{q_I} \log \left( \frac{\mu_I}{x_I} \right) + v_I \lambda &= 0 \\
+\bm{v}^T \bm{\mu} - \mu &= 0
+\end{align*}
+
+Using Newton's method, we have:
+
+\begin{equation*}
+\begin{pmatrix} \mu_1^{k + 1} \\ \vdots \\ \mu_I^{k + 1} \\ \lambda^{k + 1} \end{pmatrix} = \begin{pmatrix} \mu_1^k \\ \vdots \\ \mu_I^k \\ \lambda^k \end{pmatrix} - \left[ \nabla \bm{f} \left( \bm{\mu}^k , \lambda^k \right) \right] ^{-1} \bm{f} \left( \bm{\mu}^k , \lambda^k \right)
+\end{equation*}
+
+where:
+
+\begin{equation*}
+\bm{f} \left( \bm{\mu} , \lambda \right) = \begin{pmatrix} \frac{1}{q_1} \log \left( \frac{\mu_1}{x_ 1} \right) + v_1 \lambda \\ \vdots \\ \frac{1}{q_I} \log \left( \frac{\mu_I}{x_ I} \right) + v_I \lambda \\ \bm{v}^T \bm{\mu} - \mu\end{pmatrix}
+\end{equation*}
+
+We have:
+
+\begin{equation*}
+\frac{\partial}{\partial \mu_j} \left( \frac{1}{q_i} \log \left( \frac{\mu_i}{x_i} \right) + v_i \lambda \right) =
+\begin{cases}
+0 & \text{if } i \neq j \\
+\frac{1}{q_i \mu_i} & \text{if } i = j
+\end{cases}
+\end{equation*}
+
+\begin{equation*}
+\frac{\partial}{\partial \lambda} \left( \frac{1}{q_i} \log \left( \frac{\mu_i}{x_i} \right) + v_i \lambda \right) = v_i
+\end{equation*}
+
+\begin{equation*}
+\frac{\left( \partial \bm{v}^T \bm{\mu} - \mu \right)}{\partial \mu_i} = v_i
+\end{equation*}
+
+\begin{equation*}
+\frac{\left( \partial \bm{v}^T \bm{\mu} - \mu \right)}{\partial \lambda} = 0
+\end{equation*}
+
+thus the iterations become:
+
+\begin{equation*}
+\begin{pmatrix} \mu_1^{k + 1} \\ \vdots \\ \mu_I^{k + 1} \\ \lambda^{k + 1} \end{pmatrix} = \begin{pmatrix} \mu_1^k \\ \vdots \\ \mu_I^k \\ \lambda^k \end{pmatrix} - \begin{pmatrix} \frac{1}{q_1 \mu_1^k} & 0 & \hdots & 0 &  v_1 \\ 0 & \ddots & \ddots & \vdots & \vdots \\ \vdots & \ddots & \ddots & 0 & \vdots \\ 0 & \hdots & 0 & \frac{1}{q_I \mu_I^k} & v_I \\ v_1 & \hdots & \hdots & v_I & 0 \end{pmatrix} ^{-1} \begin{pmatrix} \frac{1}{q_1} \log \left( \frac{\mu_1^k}{x_ 1} \right) + v_1 \lambda^k \\ \vdots \\ \frac{1}{q_I} \log \left( \frac{\mu_I^k}{x_ I} \right) + v_I \lambda^k \\ \bm{v}^T \bm{\mu}^k - \mu \end{pmatrix}
+\end{equation*}
+
+\subsubsection{Dual problem}
+
+Another way of solving this problem is to write the dual problem:
+
+\begin{align*}
+& \min_{\bm{\mu}} \sup_{\lambda} \sum_{i = 1}^I \frac{1}{q_i} \left( \mu_i \log \left( \frac{\mu_i}{x_i} \right) - \mu_i + x_i \right) + \lambda \left( \bm{v}^T \bm{\mu} - \mu \right) \geq \\
+& \sup_{\lambda} - \lambda \mu - \sup_{\bm{\mu}} \sum_{i = 1}^I - \mu_i v_i \lambda - \frac{1}{q_i} \left( \mu_i \log \left( \frac{\mu_i}{x_i} \right) - \mu_i + x_i \right) = \\
+& \sup_{\lambda} - \lambda \mu - \sum_{i = 1}^I f_i^* \left( - v_i \lambda \right)
+\end{align*}
+
+where:
+
+\begin{equation*}
+f^* \left( z \right) = \sup_{\mu} \mu z - \frac{1}{q} \left( \mu \log \left( \frac{\mu}{x} \right) - \mu + x \right)
+\end{equation*}
+
+Taking the derivative of $f^*$ with respect to $\mu$, we get:
+
+\begin{equation*}
+\frac{\partial f^* \left( z \right)}{\partial \mu} = 0 = z - \frac{1}{q} \log \left( \frac{\mu}{x} \right)
+\end{equation*}
+
+which gives us:
+
+\begin{equation*}
+\mu = x \exp \left( q z \right)
+\end{equation*}
+
+and:
+
+\begin{equation*}
+f^* \left( z \right) = \frac{x}{q} \exp \left( q z \right)
+\end{equation*}
+
+Its derivative is:
+
+\begin{equation*}
+f^{* \left( 1 \right)} \left( z \right) = x \exp \left( q z \right)
+\end{equation*}
+
+The dual can then be written as a minimization problem:
+
+\begin{equation*}
+\min_\lambda \lambda \mu + \sum_{i = 1}^I f_i^* \left( - v_i \lambda \right)
+\end{equation*}
+
+Taking the derivative with respect to $\lambda$, we have:
+
+\begin{equation*}
+\mu = \sum_{i = 1}^I v_i f_i^{* \left( 1 \right)} \left( - v_i \lambda \right) = \sum_{i = 1}^I v_i x_i \exp \left( - q_i v_i \lambda \right)
+\end{equation*}
+
+which immediately gives us:
+
+\begin{equation*}
+\mu_i = f_i^{* \left( 1 \right)} \left( - v_i \lambda \right) = x_i \exp \left( - q_i v_i \lambda \right)
+\end{equation*}
+
+that is we get back to the solution of the primal problem.
+
+\subsection{A more general distance}
+
+We take:
+
+\begin{equation*}
+G \left( \mu , x \right) = \frac{1}{\alpha} \left[ \frac{x}{\alpha + 1} \left( \frac{\mu}{x} \right) ^{\alpha + 1} - \mu + c \right] \text{ and } g \left( \mu , x \right) = \frac{\partial G \left( \mu , x \right)}{\partial \mu} = \frac{1}{\alpha} \left[ \left( \frac{\mu}{x} \right) ^{\alpha} - 1\right]
+\end{equation*}
+
+\subsubsection{Primal problem}
+
+We can write the Lagrangian:
+
+\begin{equation*}
+\mathcal{L} \left( \bm{\mu} , \lambda \right) = \sum_{i = 1}^I \frac{1}{\alpha q_i} \left[ \frac{x_i}{\alpha + 1} \left( \frac{\mu_i}{x_i} \right) ^{\alpha + 1} - \mu_i + c_i \right] + \lambda \left( \bm{v}^T \bm{\mu} - \mu \right)
+\end{equation*}
+
+If we write that the partial derivatives with respect to the $\mu_i$ are equal to $0$, we get:
+
+\begin{equation*}
+\frac{\partial \mathcal{L} \left( \bm{\mu} , \lambda \right)}{\partial \mu_i} = \frac{1}{\alpha q_i} \left[ \left( \frac{\mu_i}{x_i} \right) ^{\alpha} - 1\right] + \lambda v_i = 0
+\end{equation*}
+
+\textbf{First method: $1$ unknown $\lambda$}
+
+We get the raked values:
+
+\begin{equation*}
+\mu_i = x_i \left( 1 - \alpha q_i v_i \lambda \right)^{\frac{1}{\alpha}}
+\end{equation*}
+
+Using the constraint, we get:
+
+\begin{equation*}
+\sum_{i = 1}^I v_i x_i \left( 1 - \alpha q_i v_i \lambda \right)^{\frac{1}{\alpha}} = \mu
+\end{equation*}
+
+We use Newton's method to solve this last equation for $\lambda$. We start at $\lambda^0 = 0$ and we iterate:
+
+\begin{equation*}
+\lambda^{k + 1} = \lambda^k - \frac{\mu - \sum_{i = 1}^I v_i x_i \left( 1 - \alpha q_i v_i \lambda^k \right)^{\frac{1}{\alpha}}}{\sum_{i = 1}^I q_i v_i^2 x_i \left( 1 - \alpha q_i v_i \lambda^k \right)^{\frac{1}{\alpha} - 1}}
+\end{equation*}
+
+This adds a condition on $\lambda$ for $\alpha < - 1$ or $\alpha > \frac{1}{2}$:
+
+\begin{equation*}
+\alpha q_i v_i \lambda < 1 \text{ for all } i
+\end{equation*}
+
+\textbf{Second method: $I + 1$ unknowns $\bm{\mu}$ and $\lambda$}
+
+We can also write the problem as a system of $I + 1$ linear equations:
+
+\begin{align*}
+\frac{1}{q_1 \alpha} \left[ \left( \frac{\mu_1}{x_1} \right) ^{\alpha} - 1\right] + v_1 \lambda &= 0 \\
+\cdots & \\
+\frac{1}{q_I \alpha} \left[ \left( \frac{\mu_I}{x_I} \right) ^{\alpha} - 1\right] + v_I \lambda &= 0 \\
+\bm{v}^T \bm{\mu} - \mu &= 0
+\end{align*}
+
+Using Newton's method, we have:
+
+\begin{equation*}
+\begin{pmatrix} \mu_1^{k + 1} \\ \vdots \\ \mu_I^{k + 1} \\ \lambda^{k + 1} \end{pmatrix} = \begin{pmatrix} \mu_1^k \\ \vdots \\ \mu_I^k \\ \lambda^k \end{pmatrix} - \left[ \nabla \bm{f} \left( \bm{\mu}^k , \lambda^k \right) \right] ^{-1} \bm{f} \left( \bm{\mu}^k , \lambda^k \right)
+\end{equation*}
+
+where:
+
+\begin{equation*}
+\bm{f} \left( \bm{\mu} , \lambda \right) = \begin{pmatrix} \frac{1}{q_1 \alpha} \left[ \left( \frac{\mu_1}{x_1} \right) ^{\alpha} - 1\right] + v_1 \lambda \\ \vdots \\ \frac{1}{q_I \alpha} \left[ \left( \frac{\mu_I}{x_I} \right) ^{\alpha} - 1\right] + v_I \lambda \\ \bm{v}^T \bm{\mu} - \mu \end{pmatrix}
+\end{equation*}
+
+We have:
+
+\begin{equation*}
+\frac{\partial}{\partial \mu_j} \left( \frac{1}{q_i \alpha} \left[ \left( \frac{\mu_i}{x_i} \right) ^{\alpha} - 1\right] + v_i \lambda \right) =
+\begin{cases}
+0 & \text{if } i \neq j \\
+\frac{1}{q_i x_i} \left( \frac{\mu_i}{x_i} \right)^{\alpha - 1} & \text{if } i = j
+\end{cases}
+\end{equation*}
+
+\begin{equation*}
+\frac{\partial}{\partial \lambda} \left( \frac{1}{q_i \alpha} \left[ \left( \frac{\mu_i}{x_i} \right) ^{\alpha} - 1\right] + v_i \lambda \right) = v_i
+\end{equation*}
+
+\begin{equation*}
+\frac{\left( \partial \bm{v}^T \bm{\mu} - \mu \right)}{\partial \mu_i} = v_i
+\end{equation*}
+
+\begin{equation*}
+\frac{\left( \partial \bm{v}^T \bm{\mu} - \mu \right)}{\partial \lambda} = 0
+\end{equation*}
+
+thus the iterations become:
+
+\begin{equation*}
+\begin{pmatrix} \mu_1^{k + 1} \\ \vdots \\ \mu_I^{k + 1} \\ \lambda^{k + 1} \end{pmatrix} = \begin{pmatrix} \mu_1^k \\ \vdots \\ \mu_I^k \\ \lambda^k \end{pmatrix} - \begin{pmatrix} \frac{1}{q_1 x_1} \left( \frac{\mu_1^k}{x_1} \right)^{\alpha - 1} & 0 & \hdots & 0 & v_1 \\ 0 & \ddots & \ddots & \vdots & \vdots \\ \vdots & \ddots & \ddots & 0 & \vdots \\ 0 & \hdots & 0 & \frac{1}{q_I x_I} \left( \frac{x_I}{x_I} \right)^{\alpha - 1} & v_I \\ v_1 & \hdots & \hdots & v_I & 0 \end{pmatrix} ^{-1} \begin{pmatrix} \frac{1}{q_1 \alpha} \left[ \left( \frac{\mu_1^k}{x_1} \right)^{\alpha} - 1 \right] + v_1 \lambda^k \\ \vdots \\ \frac{1}{q_I \alpha} \left[ \left( \frac{\mu_I^k}{x_I} \right)^{\alpha} - 1 \right] + v_I \lambda^k \\ \bm{v}^T \bm{\mu}^k - \mu \end{pmatrix}
+\end{equation*}
+
+\subsubsection{Dual problem}
+
+Another way of solving this problem is to write the dual problem:
+
+\begin{align*}
+& \min_{\bm{\mu}} \sup_{\lambda} \sum_{i = 1}^I \frac{1}{\alpha q_i} \left[ \frac{x_i}{\alpha + 1} \left( \frac{\mu_i}{x_i} \right) ^{\alpha + 1} - \mu_i + c_i \right] + \lambda \left( \bm{v}^T \bm{\mu} - \mu \right) \geq \\
+& \sup_{\lambda} - \lambda \mu - \sup_{\bm{\mu}} \sum_{i = 1}^I - \mu_i v_i \lambda - \frac{1}{\alpha q_i} \left[ \frac{x_i}{\alpha + 1} \left( \frac{\mu_i}{x_i} \right) ^{\alpha + 1} - \mu_i + c_i \right] = \\
+& \sup_{\lambda} - \lambda \mu - \sum_{i = 1}^I f_i^* \left( - v_i \lambda \right)
+\end{align*}
+
+where:
+
+\begin{equation*}
+f^* \left( z \right) = \sup_{\mu} \mu z - \frac{1}{\alpha q} \left[ \frac{x}{\alpha + 1} \left( \frac{\mu}{x} \right) ^{\alpha + 1} - \mu + c \right]
+\end{equation*}
+
+Taking the derivative of $f^*$ with respect to $\mu$, we get:
+
+\begin{equation*}
+\frac{\partial f^* \left( z \right)}{\partial \mu} = 0 = z - \frac{1}{\alpha q} \left[ \left( \frac{\mu}{x} \right) ^{\alpha} - 1\right]
+\end{equation*}
+
+which gives us:
+
+\begin{equation*}
+\mu = x \left( 1 + \alpha q z \right)^{\frac{1}{\alpha}}
+\end{equation*}
+
+and:
+
+\begin{equation*}
+f^* \left( z \right) = \frac{x}{q \left( \alpha + 1 \right)} \left( 1 + \alpha q z \right)^{\frac{1}{\alpha} + 1}
+\end{equation*}
+
+Its derivative is:
+
+\begin{equation*}
+f^{* \left( 1 \right)} \left( z \right) = x \left( 1 + \alpha q z \right)^{\frac{1}{\alpha}}
+\end{equation*}
+
+The dual can then be written as a minimization problem:
+
+\begin{equation*}
+\min_\lambda \lambda \mu + \sum_{i = 1}^I f_i^* \left( - v_i \lambda \right)
+\end{equation*}
+
+Taking the derivative with respect to $\lambda$, we have:
+
+\begin{equation*}
+\mu = \sum_{i = 1}^I v_i f_i^{* \left( 1 \right)} \left( - v_i \lambda \right) = \sum_{i = 1}^I v_i x_i \left( 1 - \alpha q_i v_i \lambda \right)^{\frac{1}{\alpha}}
+\end{equation*}
+
+which immediately gives us:
+
+\begin{equation*}
+\mu_i = f_i^{* \left( 1 \right)} \left( - v_i \lambda \right) = x_i \left( 1 - q_i v_i \lambda \right)^{\frac{1}{\alpha}}
+\end{equation*}
+
+that is we get back to the solution of the primal problem.
+
+\subsection{Logit distance}
+
+We want to make sure that all the raked values $\mu$ are bounded by:
+\begin{equation*}
+l_i < \mu_i < h_i
+\end{equation*}
+
+where $\bm{l}$ and $\bm{h}$ are known vectors of length $I$. For example, we could use $\bm{l} = \bm{0}$ for the lower bound and the total population number for the upper bound. We assume that all the data respect the condition $l_i < x_i < h_i$. The distance function becomes:
+
+\begin{equation*}
+G \left( \mu , x \right) = \left( \mu - l  \right) \log \frac{\mu - l}{x - l} + \left( h - \mu \right) \log \frac{h - \mu}{h - x}
+\end{equation*}
+
+Its derivative is:
+
+\begin{equation*}
+g \left( \mu , x \right) = \log \frac{\mu - l}{x - l} - \log \frac{h - \mu}{h - x}
+\end{equation*}
+
+\subsubsection{Primal problem}
+
+We can write the Lagrangian:
+
+\begin{equation*}
+\mathcal{L} \left( \bm{\mu} , \lambda \right) = \sum_{i = 1}^I \frac{\mu_i - l_i}{q_i} \log \frac{\mu_i - l_i}{x_i - l_i} + \frac{h_i - \mu_i}{q_i} \log \frac{h_i - \mu_i}{h_i - x_i} + \lambda \left( \bm{v}^T \bm{\mu} - \mu \right)
+\end{equation*}
+
+If we write that the partial derivatives with respect to the $\mu_i$ are equal to $0$, we get:
+
+\begin{equation*}
+\frac{\partial \mathcal{L} \left( \bm{\mu} , \lambda \right)}{\partial \mu_i} = \frac{1}{q_i} \left( \log \frac{\mu_i - l_i}{x_i - l_i} - \log \frac{h_i - \mu_i}{h_i - x_i} \right) + \lambda v_i = 0
+\end{equation*}
+
+\textbf{First method: $1$ unknown $\lambda$}
+
+We get the raked values:
+
+\begin{equation*}
+\mu_i = \frac{l_i \left( h_i - x_i \right) + h_i \left( x_i - l_i \right) e^{ - q_i v_i \lambda}}{ \left( h_i - x_i \right) + \left( x_i - l_i \right) e^{ - q_i v_i \lambda}} 
+\end{equation*}
+
+Using the constraint, we get:
+
+\begin{equation*}
+\sum_{i = 1}^I v_i \frac{l_i \left( h_i - x_i \right) + h_i \left( x_i - l_i \right) e^{ - q_i v_i \lambda}}{ \left( h_i - x_i \right) + \left( x_i - l_i \right) e^{ - q_i v_i \lambda}} = \mu
+\end{equation*}
+
+We use Newton's method to solve this last equation for $\lambda$. We start at $\lambda^0 = 0$ and we iterate:
+
+\begin{equation*}
+\lambda^{k + 1} = \lambda^k - \frac{\mu - \sum_{i = 1}^I v_i \frac{l_i \left( h_i - x_i \right) + h_i \left( x_i - l_i \right) e^{ - q_i v_i \lambda}}{ \left( h_i - x_i \right) + \left( x_i - l_i \right) e^{ - q_i v_i \lambda}}}{\sum_{i = 1}^I q_i v_i \frac{\left( h_i - l_i \right) \left( x_i - l_i \right) \left( h_i - x_i \right) e^{- q_i v_i \lambda}}{\left[ \left( h_i - x_i \right) + \left( x_i - l_i \right) e^{- q_i v_i \lambda} \right]^2}}
+\end{equation*}
+
+\textbf{Second method: $I + 1$ unknowns $\bm{\mu}$ and $\lambda$}
+
+We can also write the problem as a system of $I + 1$ linear equations:
+
+\begin{align*}
+\frac{1}{q_1} \left( \log \frac{\mu_1 - l_1}{x_1 - l_1} - \log \frac{h_1 - \mu_1}{h_1 - x_1} \right) + v_1 \lambda &= 0 \\
+\cdots & \\
+\frac{1}{q_I} \left( \log \frac{\mu_I - l_I}{x_I - l_I} - \log \frac{h_I - \mu_I}{h_I - x_I} \right) + v_I \lambda &= 0 \\
+\bm{v}^T \bm{\mu} - \mu &= 0
+\end{align*}
+
+Using Newton's method, we have:
+
+\begin{equation*}
+\begin{pmatrix} \mu_1^{k + 1} \\ \vdots \\ \mu_I^{k + 1} \\ \lambda^{k + 1} \end{pmatrix} = \begin{pmatrix} \mu_1^k \\ \vdots \\ \mu_I^k \\ \lambda^k \end{pmatrix} - \left[ \nabla \bm{f} \left( \bm{\mu}^k , \lambda^k \right) \right] ^{-1} \bm{f} \left( \bm{\mu}^k , \lambda^k \right)
+\end{equation*}
+
+where:
+
+\begin{equation*}
+\bm{f} \left( \bm{\mu} , \lambda \right) = \begin{pmatrix} \frac{1}{q_1} \left( \log \frac{\mu_1 - l_1}{x_1 - l_1} - \log \frac{h_1 - \mu_1}{h_1 - x_1} \right) + v_1 \lambda \\ \vdots \\ \frac{1}{q_I} \left( \log \frac{\mu_I - l_I}{x_I - l_I} - \log \frac{h_I - \mu_I}{h_I - x_I} \right) + v_I \lambda \\ \bm{v}^T \bm{\mu} - \mu\end{pmatrix}
+\end{equation*}
+
+We have:
+
+\begin{equation*}
+\frac{\partial}{\partial \mu_j} \left( \frac{1}{q_i} \left( \log \frac{\mu_i - l_i}{x_i - l_i} - \log \frac{h_i - \mu_i}{h_i - x_i} \right) + v_i \lambda \right) =
+\begin{cases}
+0 & \text{if } i \neq j \\
+\frac{1}{q_i} \left( \frac{1}{\mu_i - l_i} + \frac{1}{h_i - \mu_i} \right) & \text{if } i = j
+\end{cases}
+\end{equation*}
+
+\begin{equation*}
+\frac{\partial}{\partial \lambda} \left( \frac{1}{q_i} \left( \log \frac{\mu_i - l_i}{x_i - l_i} - \log \frac{h_i - \mu_i}{h_i - x_i} \right) + v_i \lambda \right) = v_i
+\end{equation*}
+
+\begin{equation*}
+\frac{\partial \left( \bm{v}^T \bm{\mu} - \mu \right)}{\partial \mu_i} = v_i
+\end{equation*}
+
+\begin{equation*}
+\frac{\partial \left( \bm{v}^T \bm{\mu} - \mu \right)}{\partial \lambda} = 0
+\end{equation*}
+
+thus the iterations become:
+
+\begin{equation*}
+\begin{pmatrix} \mu_1^{k + 1} \\ \vdots \\ \mu_I^{k + 1} \\ \lambda^{k + 1} \end{pmatrix} = \begin{pmatrix} \mu_1^k \\ \vdots \\ \mu_I^k \\ \lambda^k \end{pmatrix} - \begin{pmatrix} \frac{1}{q_1} \left( \frac{1}{\mu_1^k - l_1} + \frac{1}{h_1 - \mu_1^k} \right) & 0 & \hdots & 0 & v_1 \\ 0 & \ddots & \ddots & \vdots & \vdots \\ \vdots & \ddots & \ddots & 0 & \vdots \\ 0 & \hdots & 0 & \frac{1}{q_I} \left( \frac{1}{\mu_I^k - l_I} + \frac{1}{h_I - \mu_I^k} \right) & v_I \\ v_1 & \hdots & \hdots & v_I & 0 \end{pmatrix} ^{-1} \begin{pmatrix} \frac{1}{q_1} \left( \log \frac{\mu_1^k - l_1}{x_1 - l_1} - \log \frac{h_1 - \mu_1^k}{h_1 - x_1} \right) + v_1 \lambda^k \\ \vdots \\ \frac{1}{q_I} \left( \log \frac{\mu_I^k - l_I}{x_I - l_I} - \log \frac{h_I - \mu_I^k}{h_I - x_I} \right) + v_I \lambda^k \\ \bm{v}^T \bm{\mu}^k - \mu \end{pmatrix}
+\end{equation*}
+
+\subsubsection{Dual problem}
+
+Another way of solving this problem is to write the dual problem:
+
+\begin{align*}
+& \min_{\bm{\mu}} \sup_{\lambda} \sum_{i = 1}^I \frac{1}{q_i} \left[ \left( \mu_i - l_i  \right) \log \frac{\mu_i - l_i}{x_i - l_i} + \left( h_i - \mu_i \right) \log \frac{h_i - \mu_i}{h_i - x_i} \right] + \lambda \left( \bm{v}^T \bm{\mu} - \mu \right) \geq \\
+& \sup_{\lambda} - \lambda \mu - \sup_{\bm{\mu}} \sum_{i = 1}^I - \mu_i v_i \lambda - \frac{1}{q_i} \left[ \left( \mu_i - l_i  \right) \log \frac{\mu_i - l_i}{x_i - l_i} + \left( h_i - \mu_i \right) \log \frac{h_i - \mu_i}{h_i - x_i} \right] = \\
+& \sup_{\lambda} - \lambda \mu - \sum_{i = 1}^I f_i^* \left( - v_i \lambda \right)
+\end{align*}
+
+where:
+
+\begin{equation*}
+f^* \left( z \right) = \sup_{\mu} \mu z - \frac{1}{q} \left[ \left( \mu - l  \right) \log \frac{\mu - l}{x - l} + \left( h - \mu \right) \log \frac{h - \mu}{h - x} \right]
+\end{equation*}
+
+Taking the derivative of $f^*$ with respect to $\mu$, we get:
+
+\begin{equation*}
+\frac{\partial f^* \left( z \right)}{\partial \mu} = 0 = z - \frac{1}{q} \left[ \log \frac{\mu - l}{x - l} - \log \frac{h - \mu}{h - x} \right]
+\end{equation*}
+
+which gives us:
+
+\begin{equation*}
+\mu = \frac{l \left( h - x \right) + h \left( x - l \right) e^{q z}}{\left( h - x \right) + \left( x - l \right) e^{q z}}
+\end{equation*}
+
+and:
+
+\begin{equation*}
+f^* \left( z \right) = z F \left( q z \right) - \frac{G \left( F \left( q z \right) , x \right)}{q}
+\end{equation*}
+
+where:
+
+\begin{equation*}
+F \left( u \right) = \frac{l \left( h - x \right) + h \left( x - l \right) e^u}{\left( h - x \right) + \left( x - l \right) e^u}
+\end{equation*}
+
+Its derivative is:
+
+\begin{equation*}
+f^{* \left( 1 \right)} \left( z \right) = F \left( q z \right) = \frac{l \left( h - x \right) + h \left( x - l \right) e^{qz}}{\left( h - x \right) + \left( x - l \right) e^{qz}}
+\end{equation*}
+
+The dual can then be written as a minimization problem:
+
+\begin{equation*}
+\min_\lambda \lambda \mu + \sum_{i = 1}^I f_i^* \left( - v_i \lambda \right)
+\end{equation*}
+
+Taking the derivative with respect to $\lambda$, we have:
+
+\begin{equation*}
+\mu = \sum_{i = 1}^I v_i f_i^{* \left( 1 \right)} \left( - v_i \lambda \right) = \sum_{i = 1}^I v_i \frac{l \left( h_i - x_i \right) + h_i \left( x_i - l_i \right) e^{-q_i v_i \lambda}}{\left( h_i - x_i \right) + \left( x_i - l_i \right) e^{-q_i v_i \lambda}}
+\end{equation*}
+
+which immediately gives us:
+
+\begin{equation*}
+\mu_i = f_i^{* \left( 1 \right)} \left( - v_i \lambda \right) = \frac{l \left( h_i - x_i \right) + h_i \left( x_i - l_i \right) e^{-q_i v_i \lambda}}{\left( h_i - x_i \right) + \left( x_i - l_i \right) e^{-q_i v_i \lambda}}
+\end{equation*}
+
+that is we get back to the solution of the primal problem.
+
+\subsection{General distance}
+
+\subsubsection{Primal problem}
+
+We can write the Lagrangian:
+
+\begin{equation*}
+\mathcal{L} \left( \bm{\mu} , \lambda \right) = \sum_{i = 1}^I \frac{G \left( \mu_i , x_i \right)}{q_i} + \lambda \left( \bm{v}^T \bm{\mu} - \mu \right)
+\end{equation*}
+
+If we write that the partial derivatives with respect to the $\mu_i$ are equal to $0$, we get:
+
+\begin{equation*}
+\frac{\partial \mathcal{L} \left( \bm{\mu} , \lambda \right)}{\partial \mu_i} = \frac{g \left( \mu_i , x_i \right)}{q_i} + \lambda v_i = 0
+\end{equation*}
+
+where:
+
+\begin{equation*}
+g \left( \mu_i , x_i \right) = \frac{\partial G \left( \mu_i , x_i \right)}{\partial \mu_i}
+\end{equation*}
+
+\textbf{First method: $1$ unknown $\lambda$}
+
+If we denote $F \left( . , x_i \right)$ the inverse function of $g \left( . , x_i \right)$ (that is $F \left( u , x_i \right) = v$ if $g_i \left( v , x_i \right) = u$), we get the raked values:
+
+\begin{equation*}
+\mu_i = F \left( - q_i v_i \lambda , x_i \right)
+\end{equation*}
+
+Using the constraint, we get:
+
+\begin{equation*}
+\sum_{i = 1}^I v_i F \left( - q_i v_i \lambda , x_i \right) = \mu
+\end{equation*}
+
+We use Newton's method to solve this last equation for $\lambda$. We start at $\lambda^0 = 0$ and we iterate:
+
+\begin{equation*}
+\lambda^{k + 1} = \lambda^k - \frac{\mu - \sum_{i = 1}^I v_i F \left( - q_i v_i \lambda^k , x_i \right)}{\sum_{i = 1}^I q_i v_i^2 F' \left( - q_i v_i \lambda^k , x_i \right)}
+\end{equation*}
+
+\textbf{Second method: $I + 1$ unknowns $\bm{\mu}$ and $\lambda$}
+
+We can also write the problem as a system of $I + 1$ linear equations:
+
+\begin{align*}
+\frac{g \left( \mu_1 , x_1 \right)}{q_1} + v_1 \lambda &= 0 \\
+\cdots & \\
+\frac{g \left( \mu_I , x_I \right)}{q_I} + v_I \lambda &= 0 \\
+\bm{v}^T \bm{\mu} - \mu &= 0
+\end{align*}
+
+Using Newton's method, we have:
+
+\begin{equation*}
+\begin{pmatrix} \mu_1^{k + 1} \\ \vdots \\ \mu_I^{k + 1} \\ \lambda^{k + 1} \end{pmatrix} = \begin{pmatrix} \mu_1^k \\ \vdots \\ \mu_I^k \\ \lambda^k \end{pmatrix} - \left[ \nabla \bm{f} \left( \bm{\mu}^k , \lambda^k \right) \right] ^{-1} \bm{f} \left( \bm{\mu}^k , \lambda^k \right)
+\end{equation*}
+
+where:
+
+\begin{equation*}
+\bm{f} \left( \bm{\mu} , \lambda \right) = \begin{pmatrix} \frac{g \left( \mu_1 , x_1 \right)}{q_1} + v_1 \lambda \\ \vdots \\ \frac{g \left( \mu_I, x_I \right)}{q_I} + v_I \lambda \\ \bm{v}^T \bm{\mu} - \mu \end{pmatrix}
+\end{equation*}
+
+We have:
+
+\begin{equation*}
+\frac{\partial \left( \frac{g \left( \mu_i , x_i \right)}{q_i} + v_i \lambda \right)}{\partial \mu_j} =
+\begin{cases}
+0 & \text{if } i \neq j \\
+\frac{g' \left( \mu_i , x_i \right)}{q_i} & \text{if } i = j
+\end{cases}
+\end{equation*}
+
+\begin{equation*}
+\frac{\partial \left( \frac{g \left( \mu_i , x_i \right)}{q_i} + v_i \lambda \right)}{\partial \lambda} = v_i
+\end{equation*}
+
+\begin{equation*}
+\frac{\partial \left( \bm{v}^T \bm{\mu} - \mu \right)}{\partial \mu_i} = v_i
+\end{equation*}
+
+\begin{equation*}
+\frac{\partial \left( \bm{v}^T \bm{\mu} - \mu \right)}{\partial \lambda} = 0
+\end{equation*}
+
+thus the iterations become:
+
+\begin{equation*}
+\begin{pmatrix} \mu_1^{k + 1} \\ \vdots \\ \mu_I^{k + 1} \\ \lambda^{k + 1} \end{pmatrix} = \begin{pmatrix} \mu_1^k \\ \vdots \\ \mu_I^k \\ \lambda^k \end{pmatrix} - \begin{pmatrix} \frac{g' \left( \mu_1^k , x_1 \right)}{q_1} & 0 & \hdots & 0 & v_1 \\ 0 & \ddots & \ddots & \vdots & \vdots \\ \vdots & \ddots & \ddots & 0 & \vdots \\ 0 & \hdots & 0 & \frac{g' \left( \mu_I^k , x_I \right)}{q_I} & v_I \\ v_1 & \hdots & \hdots & v_I & 0 \end{pmatrix} ^{-1} \begin{pmatrix} \frac{g \left( \mu_1^k , x_1 \right)}{q_1} + v_1 \lambda^k \\ \vdots \\ \frac{g \left( \mu_I^k , x_I \right)}{q_I} + v_I \lambda^k \\ \bm{v}^T \bm{\mu}^k - \mu  \end{pmatrix}
+\end{equation*}
+
+\subsubsection{Dual problem}
+
+Another way of solving this problem is to write the dual problem:
+
+\begin{align*}
+& \min_{\bm{\mu}} \sup_{\lambda} \sum_{i = 1}^I \frac{G \left( \mu_i , x_i \right)}{q_i} + \lambda \left( \bm{v}^T \bm{\mu} - \mu \right) \geq \\
+& \sup_{\lambda} - \lambda \mu - \sup_{\bm{\mu}} \sum_{i = 1}^I - \mu_i v_i \lambda - \frac{G \left( \mu_i , x_i \right)}{q_i} = \\
+& \sup_{\lambda} - \lambda \mu - \sum_{i = 1}^I f_i^* \left( - v_i \lambda \right)
+\end{align*}
+
+where:
+
+\begin{equation*}
+f^* \left( z \right) = \sup_{\mu} \mu z - \frac{G \left( \mu , x \right)}{q}
+\end{equation*}
+
+Taking the derivative of $f^*$ with respect to $\mu$, we get:
+
+\begin{equation*}
+\frac{\partial f^* \left( z \right)}{\partial \mu} = 0 = z - \frac{g \left( \mu , x \right)}{q}
+\end{equation*}
+
+which gives us:
+
+\begin{equation*}
+q z = g \left( \mu , x \right)
+\end{equation*}
+
+that is:
+
+\begin{equation*}
+\mu = F \left( q z , x \right)
+\end{equation*}
+
+and:
+
+\begin{equation*}
+f^* \left( z \right) = z F \left( q z , x \right) - \frac{G \left( F \left( q z , x \right) , x \right)}{q}
+\end{equation*}
+
+Its derivative is:
+
+\begin{equation*}
+f^{* \left( 1 \right)} \left( z \right) = F \left( q z , x \right) + F' \left( q z , x \right) \left( q z - g \left( F \left( q z , x \right) , x \right) \right) = F \left( q z , x \right)
+\end{equation*}
+
+because $g \left( F \left( q z , x \right) , x \right) = q z$.  The dual can then be written as a minimization problem:
+
+\begin{equation*}
+\min_\lambda \lambda \mu + \sum_{i = 1}^I f_i^* \left( - v_i \lambda \right)
+\end{equation*}
+
+Taking the derivative with respect to $\lambda$, we have:
+
+\begin{equation*}
+\mu = \sum_{i = 1}^I v_i f_i^{* \left( 1 \right)} \left( - v_i \lambda \right) = \sum_{i = 1}^I v_i F \left( - q_i v_i \lambda \right)
+\end{equation*}
+
+which immediately gives us:
+
+\begin{equation*}
+\mu_i = f_i^{* \left( 1 \right)} \left( - v_i \lambda \right) = F \left( - q_i v_i \lambda , x_i \right)
+\end{equation*}
+
+that is we get back to the solution of the primal problem.
+
+\section{2-dimensional raking}
+
+\subsection{General distance}
+
+We want to solve the optimization problem:
+\begin{equation*}
+\min_{\bm{M}} \sum_{i = 1}^I \sum_{j = 1}^J \frac{G \left( \mu_{i,j} , x_{i,j} \right)}{q_{i,j}}
+\end{equation*}
+
+under the constraints:
+
+\begin{equation*}
+\bm{M} \bm{v}_1 = \bm{\mu}_1 \text{ and } \bm{M}^T \bm{v}_2 = \bm{\mu}_2
+\end{equation*}
+
+\subsubsection{Primal problem}
+
+We can write the Lagrangian:
+
+\begin{equation*}
+\mathcal{L} \left( \mu_{i,j} , \bm{\lambda}_1 , \bm{\lambda}_2 \right) = \sum_{i = 1}^I \sum_{j = 1}^J \frac{G_{i,j} \left( \mu_{i,j} , x_{i,j} \right)}{q_{i,j}} + \bm{\lambda}_1^T \left( \bm{M} \bm{v}_1 - \bm{\mu}_1 \right) + \bm{\lambda}_2^T \left( \bm{M}^T \bm{v}_2 - \bm{\mu}_2 \right)
+\end{equation*}
+
+If we write that the partial derivatives with respect to the $\mu_{i,j}$ are equal to $0$, we get:
+
+\begin{equation*}
+\frac{\partial \mathcal{L} \left( \mu_{i,j} , \bm{\lambda}_1 , \bm{\lambda}_2 \right)}{\partial \mu_i} = \frac{g_{i,j} \left( \mu_{i,j} , x_{i,j} \right)}{q_{i,j}} + \lambda_{1,i} v_{1,j} + \lambda_{2,j} v_{2,i} = 0
+\end{equation*}
+
+where:
+
+\begin{equation*}
+g_{i,j} \left( \mu_{i,j} , x_{i,j} \right) = \frac{\partial G_{i,j} \left( \mu_{i,j} , x_{i,j} \right)}{\partial \mu_{i,j}}
+\end{equation*}
+
+\textbf{First method: $I + J$ unknowns $\bm{\lambda}_1$ and $\bm{\lambda}_2$}
+
+If we denote $F_{i,j} \left( . \right)$ the inverse function of $g_{i,j} \left( . , x_{i,j} \right)$ (that is $F_{i,j} \left( u \right) = v$ if $g_{i,j} \left( v , x_{i,j} \right) = u$), we get the raked values:
+
+\begin{equation*}
+\mu_{i,j} = F_{i,j} \left( - q_{i,j} \left( \lambda_{1,i} v_{1,j} + \lambda_{2,j} v_{2,i} \right) \right)
+\end{equation*}
+
+Using the constraint, we get:
+
+\begin{align*}
+F \left( - \bm{Q} \odot \left( \bm{\lambda}_1 \bm{v}_1^T + \bm{v}_2 \bm{\lambda}_2^T \right) \right) \bm{v}_1 &= \bm{\mu}_1 \\
+F \left( - \bm{Q} \odot \left( \bm{\lambda}_1 \bm{v}_1^T + \bm{v}_2 \bm{\lambda}_2^T \right) \right)^T \bm{v}_2 &= \bm{\mu}_2
+\end{align*}
+
+We use alternative iterations on $\bm{\lambda}_1$ and $\bm{\lambda}_2$ to solve this last linear system for $\bm{\lambda}_1$ and $\bm{\lambda}_2$. We start at $\bm{\lambda}_1^0 = \bm{0}$ and $\bm{\lambda}_1^0 = \bm{0}$ and we iterate:
+
+\begin{align*}
+\begin{pmatrix} \lambda_{1,1}^{k + 1} \\ \vdots \\ \lambda_{1,I}^{k + 1} \end{pmatrix} &= \begin{pmatrix} \lambda_{1,1}^k \\ \vdots \\ \lambda_{1,I}^k \end{pmatrix} - \left[ \nabla_{\bm{\lambda}_1} \bm{f_1} \left( \bm{\lambda}_1^k , \bm{\lambda}_2^k \right) \right] ^{-1} \bm{f_1} \left( \bm{\lambda}_1^k , \bm{\lambda}_2^k \right) \\
+\begin{pmatrix} \lambda_{2,1}^{k + 1} \\ \vdots \\ \lambda_{2,J}^{k + 1} \end{pmatrix} &= \begin{pmatrix} \lambda_{2,1}^k \\ \vdots \\ \lambda_{2,J}^k \end{pmatrix} - \left[ \nabla_{\bm{\lambda}_2} \bm{f_2} \left( \bm{\lambda}_1^{k+1} , \bm{\lambda}_2^k \right) \right] ^{-1} \bm{f_2} \left( \bm{\lambda}_1^{k+1} , \bm{\lambda}_2^k \right)
+\end{align*}
+
+where:
+
+\begin{align*}
+\bm{f_1} \left( \bm{\lambda}_1^k , \bm{\lambda}_2^k \right) &= \bm{\mu}_1 - F \left( - \bm{Q} \odot \left( \bm{\lambda}_1^k \bm{v}_1^T + \bm{v}_2 \bm{\lambda}_2^{k T} \right) \right) \bm{v}_1 \\
+\bm{f_2} \left( \bm{\lambda}_1^{k+1} , \bm{\lambda}_2^k \right) &= \bm{\mu}_2 - F \left( - \bm{Q} \odot \left( \bm{\lambda}_1^{k+1} \bm{v}_1^T + \bm{v}_2 \bm{\lambda}_2^{k T} \right) \right)^T \bm{v}_2
+\end{align*}
+
+We have:
+
+\begin{align*}
+\nabla_{\bm{\lambda}_1} \bm{f_1} \left( \bm{\lambda}_1^k , \bm{\lambda}_2^k \right) &= \text{diag} \left( \left[ \bm{Q} \odot F' \left( - \bm{Q} \odot \left( \bm{\lambda}_1^k \bm{v}_1^T + \bm{v}_2 \bm{\lambda}_2^{k T} \right) \right) \right] \left[ \bm{v}_1^{\odot 2} \right] \right) \\
+\nabla_{\bm{\lambda}_2} \bm{f_2} \left( \bm{\lambda}_1^{k + 1} , \bm{\lambda}_2^k \right) &= \text{diag} \left( \left[ \bm{Q} \odot F' \left( - \bm{Q} \odot \left( \bm{\lambda}_1^{k + 1} \bm{v}_1^T + \bm{v}_2 \bm{\lambda}_2^{k T} \right) \right) \right]^T \left[ \bm{v}_2^{\odot 2} \right] \right)
+\end{align*}
+
+When $G \left( \mu , x \right) = \mu \log \left( \frac{\mu}{x} \right) - \mu + x$, we have $F \left( u , x \right) = x e^u$ and $F' \left( u , x \right) = x e^u$. If $\bm{v}_1 = \bm{1}$, $\bm{v}_2 = \bm{1}$ and $q_{i,j} = 1$ for all {i,j}, the iterations become:
+
+\begin{align*}
+\bm{f}_{\bm{1},i} \left( \bm{\lambda}_1^k , \bm{\lambda}_2^k \right) &= \bm{\mu}_{1,i} - e^{- \lambda_{1,i}^k} \sum_{j = 1}^J x_{i,j} e^{- \lambda_{2,j}^k} \\
+\bm{f}_{\bm{2},j} \left( \bm{\lambda}_1^{k+1} , \bm{\lambda}_2^k \right) &= \bm{\mu}_{2,j} - e^{- \lambda_{2,j}^k} \sum_{i = 1}^I x_{i,j} e^{- \lambda_{1,i}^{k+1}}
+\end{align*}
+
+and:
+
+\begin{align*}
+\nabla_{\bm{\lambda}_1} \bm{f}_{\bm{1},i,i} \left( \bm{\lambda}_1^k , \bm{\lambda}_2^k \right) &= e^{-\lambda_{1,i}^k} \sum_{j = 1}^J x_{i,j} e^{- \lambda_{2,j}^k} \\
+\nabla_{\bm{\lambda}_1} \bm{f}_{\bm{2},j,j} \left( \bm{\lambda}_1^{k + 1} , \bm{\lambda}_2^k \right) &= e^{-\lambda_{2,j}^k} \sum_{i = 1}^I x_{i,j} e^{- \lambda_{1,i}^{k + 1}}
+\end{align*}
+
+\textbf{Second method: $I J + I + J$ unknowns $\bm{M}$, $\bm{\lambda}_1$ and $\bm{\lambda}_2$}
+
+We can also write the problem as a system of $I J + I + J$ linear equations:
+
+\begin{align*}
+g_{1,1} \left( \mu_{1,1} , x_{1,1} \right) + q_{1,1} \left( \lambda_{1,1} v_{1,1} + \lambda_{2,1} v_{2,1} \right) &= 0 \\
+\cdots & \\
+g_{I,J} \left( \mu_{I,J} , x_{I,J} \right) + q_{I,J} \left( \lambda_{1,I} v_{1,J} + \lambda_{2,J} v_{2,I} \right) &= 0 \\
+\bm{M} \bm{v}_1 - \bm{\mu}_1 &= 0 \\
+\bm{M}^T \bm{v}_2 - \bm{\mu}_2 &= 0
+\end{align*}
+
+Using Newton's method, we have:
+
+\begin{equation*}
+\begin{pmatrix} \mu_{1,1}^{k + 1} \\ \vdots \\ \mu_{I,J}^{k + 1} \\ \bm{\lambda}_1^{k + 1} \\ \bm{\lambda}_2^{k + 1} \end{pmatrix} = \begin{pmatrix} \mu_{1,1}^k \\ \vdots \\ \mu_{I,J}^k \\ \bm{\lambda}_1^k \\ \bm{\lambda}_2^k \end{pmatrix} - \left[ \nabla \bm{f} \left( \bm{M}^k , \bm{\lambda}_1^k , \bm{\lambda}_2^k \right) \right] ^{-1} \bm{f} \left( \bm{M}^k , \bm{\lambda}_1^k , \bm{\lambda}_2^k \right)
+\end{equation*}
+
+where:
+
+\begin{equation*}
+\bm{f} \left( \bm{M}^k , \bm{\lambda}_1^k , \bm{\lambda}_2^k \right) = \begin{pmatrix} g_{1,1} \left( \mu_{1,1} , x_{1,1} \right) + q_{1,1} \left( \lambda_{1,1} v_{1,1} + \lambda_{2,1} v_{2,1} \right) \\ \vdots \\ g_{I,J} \left( \mu_{I,J} , x_{I,J} \right) + q_{I,J} \left( \lambda_{1,I} v_{1,J} + \lambda_{2,J} v_{2,I} \right) \\ \bm{M} \bm{v}_1 - \bm{\mu}_1 \\ \bm{M}^T \bm{v}_2 - \bm{\mu}_2 \end{pmatrix}
+\end{equation*}
+
+We have:
+
+\begin{equation*}
+\frac{\partial \left( g \left( \mu_{i,j} , x_{i,j} \right) + q_{i,j} \left( \lambda_{1,i} v_{1,j} + \lambda_{2,j} v_{2,i} \right) \right)}{\partial \mu_{k,l}} =
+\begin{cases}
+0 & \text{if } i \neq k \text{ or } j \neq l \\
+g' \left( \mu_{i,j} , x_{i,j} \right) & \text{if } i = k \text{ and } j = l
+\end{cases}
+\end{equation*}
+
+\begin{equation*}
+\frac{\partial \left( g \left( \mu_{i,j} , x_{i,j} \right) + q_{i,j} \left( \lambda_{1,i} v_{1,j} + \lambda_{2,j} v_{2,i} \right) \right)}{\partial \lambda_{1,k}} =
+\begin{cases}
+0 & \text{if } i \neq k \\
+q_{i,j} v_{1,j} & \text{if } i = k
+\end{cases}
+\end{equation*}
+
+\begin{equation*}
+\frac{\partial \left( g \left( \mu_{i,j} , x_{i,j} \right) + q_{i,j} \left( \lambda_{1,i} v_{1,j} + \lambda_{2,j} v_{2,i} \right) \right)}{\partial \lambda_{2,l}} =
+\begin{cases}
+0 & \text{if } j \neq l \\
+q_{i,j} v_{2,i} & \text{if } j = l
+\end{cases}
+\end{equation*}
+
+\begin{equation*}
+\frac{\partial \left( \left[ \bm{M} \bm{v}_1 - \bm{\mu}_1 \right]_i \right)}{\partial \mu_{k,l}} =
+\begin{cases}
+0 & \text{if } i \neq k \\
+v_{1,l} & \text{if } i = k
+\end{cases}
+\end{equation*}
+
+\begin{equation*}
+\frac{\partial \left( \left[ \bm{M}^T \bm{v}_2 - \bm{\mu}_2 \right]_j \right)}{\partial \mu_{k,l}} =
+\begin{cases}
+0 & \text{if } j \neq l \\
+v_{2,k} & \text{if } j = l
+\end{cases}
+\end{equation*}
+
+\begin{equation*}
+\frac{\partial \left( \bm{M} \bm{v}_1 - \bm{\mu}_1 \right)}{\partial \lambda_{1,i}} = \frac{\partial \left( \bm{M} \bm{v}_1 - \bm{\mu}_1 \right)}{\partial \lambda_{2,j}} = \frac{\partial \left( \bm{M}^T \bm{v}_2 - \bm{\mu}_2 \right)}{\partial \lambda_{1,i}} = \frac{\partial \left( \bm{M}^T \bm{v}_2 - \bm{\mu}_2 \right)}{\partial \lambda_{2,j}} = 0
+\end{equation*}
+
+\subsubsection{Dual problem}
+
+Another way of solving this problem is to write the dual problem:
+
+\begin{align*}
+& \min_{\bm{M}} \sup_{\bm{\lambda}_1 , \bm{\lambda}_2} \sum_{i = 1}^I \sum_{j = 1}^J \frac{G_{i,j} \left( \mu_{i,j} , x_{i,j} \right)}{q_{i,j}} + \bm{\lambda}_1^T \left( \bm{M} \bm{v}_1 - \bm{\mu}_1 \right) + \bm{\lambda}_2^T \left( \bm{M}^T \bm{v}_2 - \bm{\mu}_2 \right) \geq \\
+& \sup_{\bm{\lambda}_1, \bm{\lambda}_2} - \bm{\lambda}_1^T \bm{\mu}_1 - \bm{\lambda_2^T} \bm{\mu}_2 - \sup_{\bm{M}} \sum_{i = 1}^I \sum_{j = 1}^J \mu_{i,j} \left( - \lambda_{1,i} v_{1,j} - \lambda_{2,j} v_{2,i} \right) - \frac{G_{i,j} \left( \mu_{i,j} , x_{i,j} \right)}{q_{i,j}} = \\
+& \sup_{\bm{\lambda}_1, \bm{\lambda}_2} - \bm{\lambda}_1^T \bm{\mu}_1 - \bm{\lambda_2^T} \bm{\mu}_2 - \sum_{i = 1}^I \sum_{j = 1}^J f_{i,j}^* \left( - \lambda_{1,i} v_{1,j} - \lambda_{2,j} v_{2,i} \right)
+\end{align*}
+
+where:
+
+\begin{equation*}
+f^* \left( z \right) = \sup_{\mu} \mu z - \frac{G \left( \mu , x \right)}{q}
+\end{equation*}
+
+Taking the derivative of $f^*$ with respect to $\mu$, we get:
+
+\begin{equation*}
+\frac{\partial f^* \left( z \right)}{\partial \mu} = 0 = z - \frac{g \left( \mu , x \right)}{q}
+\end{equation*}
+
+which gives us:
+
+\begin{equation*}
+q z = g \left( \mu , x \right)
+\end{equation*}
+
+that is:
+
+\begin{equation*}
+\mu = F \left( q z \right)
+\end{equation*}
+
+and:
+
+\begin{equation*}
+f^* \left( z \right) = z F \left( q z \right) - \frac{G \left( F \left( q z \right) , x \right)}{q}
+\end{equation*}
+
+Its derivative is:
+
+\begin{equation*}
+f^{* \left( 1 \right)} \left( z \right) = F \left( q z \right) + F' \left( q z \right) \left( q z - g \left( F \left( q z \right) , x \right) \right) = F \left( q z \right)
+\end{equation*}
+
+because $g \left( F \left( qz \right) , x \right) = q z$.  The dual can then be written as a minimization problem:
+
+\begin{equation*}
+\min_{\bm{\lambda}_1, \bm{\lambda}_2} \bm{\lambda}_1^T \bm{\mu}_1 + \bm{\lambda_2^T} \bm{\mu}_2 + \sum_{i = 1}^I \sum_{j = 1}^J f_{i,j}^* \left( - \lambda_{1,i} v_{1,j} - \lambda_{2,j} v_{2,i} \right)
+\end{equation*}
+
+Taking the derivative with respect to $\bm{\lambda}_1$ and $\bm{\lambda}_2$, we have:
+
+\begin{align*}
+\bm{\mu}_1 &= \left[ f^{* \left( 1 \right)} \left( - \bm{\lambda}_1 \bm{v}_1^T - \bm{v}_2 \bm{\lambda}_2^T \right) \right] \bm{v}_1 = F \left( - \bm{Q} \odot \left( \bm{\lambda}_1 \bm{v}_1^T + \bm{v}_2 \bm{\lambda}_2^T \right) \right) \bm{v}_1 \\
+\bm{\mu}_2 &= \left[ f^{* \left( 1 \right)} \left( - \bm{\lambda}_1 \bm{v}_1^T - \bm{v}_2 \bm{\lambda}_2^T \right) \right]^T \bm{v}_2 = F \left( - \bm{Q} \odot \left( \bm{\lambda}_1 \bm{v}_1^T + \bm{v}_2 \bm{\lambda}_2^T \right) \right)^T \bm{v}_2
+\end{align*}
+
+which immediately gives us:
+
+\begin{equation*}
+\mu_{i,j} = F_{i,j} \left( - q_{i,j} \left( \lambda_{1,i} v_{1,j} + \lambda_{2,j} v_{2,i} \right) \right)
+\end{equation*}
+
+that is we get back to the solution of the primal problem.
+
+\section{k-dimensional raking}
+
+In this section, instead of computing the raking weights $\alpha_n$, we compute the raked values $\mu_n$. That will make it easier to add a condition $0 < \mu_n < 1$ on the raked values if we are interested in prevalence. Our objective is then to find the $\mu_n$ that minimize:
+
+\begin{equation*}
+\left( \frac{1}{\bm{q}} \right)^T \left( G \left( \bm{\mu} , \bm{x} \right) \right)
+\end{equation*}
+
+under a linear constraint on $\bm{\mu}$:
+
+\begin{equation*}
+\bm{A} \bm{\mu} = \bm{y}
+\end{equation*}
+
+where $\bm{A}$ is a matrix with $M$ rows and $N$ columns.
+
+\subsection{General distance}
+
+\subsubsection{Primal problem}
+
+We can write the Lagrangian:
+
+\begin{equation*}
+\mathcal{L} \left( \bm{\mu} , \bm{\lambda} \right) = \left( \frac{1}{\bm{q}} \right)^T \left( G \left( \bm{\mu} , \bm{x} \right) \right) + \bm{\lambda}^T \left( \bm{A} \bm{\mu} - \bm{y} \right)
+\end{equation*}
+
+If we write that the partial derivatives with respect to the $\mu_n$ are equal to $0$, we get:
+
+\begin{equation*}
+\frac{\partial \mathcal{L} \left( \bm{\mu} , \bm{\lambda} \right)}{\partial \mu_n} = 0 =
+\frac{g \left( \mu_n , x_n \right)}{q_n} + \bm{\lambda}^T \bm{A}_{.,n}
+\end{equation*}
+
+where $\bm{A}_{.,n}$ is the $n$-th column of $\bm{A}$ and:
+
+\begin{equation*}
+g \left( \mu_n , x_n \right) = \frac{\partial G \left( \mu_n , x_n \right)}{\partial \mu_n}
+\end{equation*}
+
+\textbf{First method: $M$ unknowns $\bm{\lambda}$}
+
+If we denote $F \left( . , x_n \right)$ the inverse function of $g \left( . , x_n \right)$ (that is $F \left( u , x_n \right) = v$ if $ g \left( v , x_n \right) = u$), we get the raked values:
+
+\begin{equation*}
+\mu_n = F \left( - q_n \bm{\lambda}^T \bm{A}_{.,n} , x_n \right)
+\end{equation*}
+
+Using the constraint, we get:
+
+\begin{equation*}
+\bm{A} \left[ F \left( - \bm{q} \odot \left( \bm{A}^T \bm{\lambda} \right) , \bm{x} \right) \right] = \bm{y}
+\end{equation*}
+
+We use Newton’s method to solve this last equation for $\bm{\lambda}$. We denote:
+
+\begin{equation*}
+\bm{\Phi} \left( \bm{\lambda} \right) = \bm{A} \bm{x} - \bm{A} \left[ F \left( - \bm{q} \odot \left( \bm{A}^T \bm{\lambda} \right) , \bm{x} \right) \right] \text{ and } \hat{\bm{y}} = \bm{A} \bm{x}
+\end{equation*}
+
+thus we need to solve:
+
+\begin{equation*}
+\bm{\Phi} \left( \bm{\lambda} \right) - \hat{\bm{y}} + \bm{y} = \bm{0}
+\end{equation*}
+
+We start at $\bm{\lambda}^0 = \bm{0}$ and we iterate:
+
+\begin{equation*}
+\bm{\lambda}^{k + 1} = \bm{\lambda}^k - \left( \nabla_{\bm{\lambda}} \bm{\Phi} \left( \bm{\lambda} \right) \right) ^{-1} \left( \bm{\Phi} \left( \bm{\lambda} \right) - \hat{\bm{y}} + \bm{y} \right)
+\end{equation*}
+
+with:
+
+\begin{equation*}
+\nabla_{\bm{\lambda}} \bm{\Phi} \left( \bm{\lambda} \right) = \bm{A} \text{diag} \left[ \bm{q} \odot F' \left( - \bm{q} \odot \left( \bm{A}^T \bm{\lambda} \right) \right) \right] \bm{A}^T
+\end{equation*}
+
+\textbf{Second method: $N + M$ unknowns $\bm{\mu}$ and $\bm{\lambda}$}
+
+We can also write the problem as a system of $N + M$ linear equations:
+
+\begin{align*}
+\frac{g \left( \mu_1 , x_1 \right)}{q_1} + \bm{\lambda}^T \bm{A}_{.,1} &= 0 \\
+\cdots & \\
+\frac{g \left( \mu_N , x_N \right)}{q_N} + \bm{\lambda}^T \bm{A}_{.,N} &= 0 \\
+\bm{A}_{1,.}^T \bm{\mu} - y_1 &= 0 \\
+\cdots & \\
+\bm{A}_{M,.}^T \bm{\mu} - y_M &= 0
+\end{align*}
+
+Using Newton's method, we have:
+
+\begin{equation*}
+\begin{pmatrix} \mu_1^{k + 1} \\ \vdots \\ \mu_N^{k + 1} \\ \lambda_1^{k + 1} \\ \vdots \\ \lambda_M^{k + 1} \end{pmatrix} = \begin{pmatrix} \mu_1^k \\ \vdots \\ \mu_N^k \\ \lambda_1^k \\ \vdots \\ \lambda_M^k \end{pmatrix} - \left[ \nabla \bm{H} \left( \bm{\mu}^k , \bm{\lambda}^k \right) \right] ^{-1} \bm{H} \left( \bm{\mu}^k , \bm{\lambda}^k \right)
+\end{equation*}
+
+where:
+
+\begin{equation*}
+\bm{H} \left( \bm{\mu} , \bm{\lambda} \right) = \begin{pmatrix} \frac{g \left( \mu_1 , x_1 \right)}{q_1} + \bm{\lambda}^T \bm{A}_{.,1} \\ \vdots \\ \frac{g \left( \mu_N , x_N \right)}{q_N} + \bm{\lambda}^T \bm{A}_{.,N} \\ \bm{A}_{1,.}^T \bm{\mu} - y_1 \\ \vdots \\ \bm{A}_{M,.}^T \bm{\mu} - y_M \end{pmatrix}
+\end{equation*}
+
+We have:
+
+\begin{equation*}
+\frac{\partial \left( \frac{g \left( \mu_n , x_n \right)}{q_n} + \bm{\lambda}^T \bm{A}_{.,n} \right)}{\partial \mu_l} =
+\begin{cases}
+0 & \text{if } n \neq l \\
+\frac{1}{q_n} \frac{\partial g \left( \mu_n , x_n \right)}{\partial \mu_n} & \text{if } n = l
+\end{cases}
+\end{equation*}
+
+\begin{equation*}
+\frac{\partial \left( \frac{g \left( \mu_n , x_n \right)}{q_n} + \bm{\lambda}^T \bm{A}_{.,n} \right)}{\partial \lambda_m} = A_{mn}
+\end{equation*}
+
+\begin{equation*}
+\frac{\partial \left( \bm{A}_{m,.}^T \bm{\mu} - y_m \right)}{\partial \mu_n} = A_{mn}
+\end{equation*}
+
+\begin{equation*}
+\frac{\partial \left( \bm{A}_{m,.}^T \bm{\mu} - y_m \right)}{\partial \lambda_l} = 0
+\end{equation*}
+
+thus the iterations become:
+
+\begin{equation*}
+\begin{pmatrix} \mu_1^{k + 1} \\ \vdots \\ \mu_N^{k + 1} \\ \lambda_1^{k + 1} \\ \vdots \\ \lambda_M^{k + 1} \end{pmatrix} = \begin{pmatrix} \mu_1^k \\ \vdots \\ \mu_N^k \\ \lambda_1^k \\ \vdots \\ \lambda_M^k \end{pmatrix} - \begin{pmatrix} \text{diag} \left( \frac{1}{q_n} \frac{\partial g \left( \mu_n , x_n \right)}{\partial \mu_n} \right) & \bm{A}^T \\ \bm{A} & \bm{0}_{m \times m} \end{pmatrix} ^{-1} \begin{pmatrix} \frac{g \left( \mu_1 , x_1 \right)}{q_1} + \bm{\lambda}^T \bm{A}_{.,1} \\ \vdots \\ \frac{g \left( \mu_N , x_N \right)}{q_N} + \bm{\lambda}^T \bm{A}_{.,N} \\ \bm{A}_{1,.}^T \bm{\mu} - y_1 \\ \vdots \\ \bm{A}_{M,.}^T \bm{\mu} - y_M \end{pmatrix}
+\end{equation*}
+
+\subsubsection{Dual problem}
+
+Another way of solving this problem is to write the dual problem:
+
+\begin{align*}
+& \min_{\bm{\mu}} \sup_{\bm{\lambda}} \left( \frac{1}{\bm{q}} \right) \left( G \left( \bm{\mu} , \bm{x} \right) \right) + \bm{\lambda}^T \left( \bm{A} \bm{\mu} - \bm{y} \right) \geq \\
+& \sup_{\bm{\lambda}} - \bm{\lambda}^T \bm{y} - \sup_{\bm{\mu}} - \bm{\lambda}^T \bm{A} \bm{\mu} - \left( \frac{1}{\bm{q}} \right)^T \left( G \left( \bm{\mu} , \bm{x} \right) \right) = \\
+& \sup_{\bm{\lambda}} - \bm{\lambda}^T \bm{y} -  \bm{1}^T \left[ f^* \left( - \bm{A}^T \bm{\lambda} \right) \right]
+\end{align*}
+
+where:
+
+\begin{equation*}
+f^* \left( z \right) = \sup_{\mu} \mu z - \frac{G \left( \mu , x \right)}{q}
+\end{equation*}
+
+Taking the derivative of $f^*$ with respect to $\mu$, we get:
+
+\begin{equation*}
+\frac{\partial f^* \left( z \right)}{\partial \mu} = 0 = z - \frac{g \left( \mu , x \right)}{q}
+\end{equation*}
+
+which gives us:
+
+\begin{equation*}
+q z = g \left( \mu , x \right)
+\end{equation*}
+
+that is:
+
+\begin{equation*}
+\mu = F \left( q z \right)
+\end{equation*}
+
+and:
+
+\begin{equation*}
+f^* \left( z \right) = z F \left( q z \right) - \frac{G \left( F \left( q z \right) , x \right)}{q}
+\end{equation*}
+
+Its derivative is:
+
+\begin{equation*}
+f^{* \left( 1 \right)} \left( z \right) = F \left( q z \right) + F' \left( q z \right) \left( q z - g \left( F \left( q z \right) , x \right) \right) = F \left( q z \right)
+\end{equation*}
+
+because $g \left( F \left( qz \right) , x \right) = q z$. The dual can be written as a minimization problem:
+
+\begin{equation*}
+\min_{\bm{\lambda}} \bm{\lambda}^T \bm{y} + \bm{1}^T \left[ f^* \left( - \bm{A}^T \bm{\lambda} \right) \right] 
+\end{equation*}
+
+Taking the derivative with respect to $\bm{\lambda}$, we have:
+
+\begin{equation*}
+\bm{y} = \bm{A} \left[ f^{* \left( 1 \right)} \left( - \bm{A}^T \bm{\lambda} \right) \right]
+\end{equation*}
+
+which immediately gives us:
+
+\begin{equation*}
+\mu_n = f_n^{* \left( 1 \right)} \left( - \bm{\lambda}^T \bm{A}_{.,n} \right) = F_n \left( - q_n \bm{\lambda}^T \bm{A}_{.n} \right)
+\end{equation*}
+
+that is we get back to the solution of the primal problem.
+
+\subsection{Chi-square distance}
+
+We take:
+
+\begin{equation*}
+G \left( \mu , x \right) = \frac{1}{2 x} \left( \mu - x \right) ^2 \text{ and } g \left( \mu , x \right) = \frac{\partial G \left( \mu , x \right)}{\partial \mu} = \frac{\mu}{x} - 1
+\end{equation*}
+
+\subsubsection{Primal problem}
+
+We can write the Lagrangian:
+
+\begin{equation*}
+\mathcal{L} \left( \bm{\mu} , \bm{\lambda} \right) = \left( \frac{1}{\bm{q}} \right)^T \left[ \left( \frac{1}{2 \bm{x}} \right) \odot \left( \bm{\mu} - \bm{x} \right)^{\odot 2} \right] + \bm{\lambda}^T \left( \bm{A} \bm{\mu} - \bm{y} \right)
+\end{equation*}
+
+If we write that the partial derivatives with respect to the $\mu_n$ are equal to $0$, we get:
+
+\begin{equation*}
+\frac{\partial \mathcal{L} \left( \bm{\mu} , \bm{\lambda} \right)}{\partial \mu_n} = 0 =
+\frac{1}{q_n} \left( \frac{\mu_n}{x_n} - 1 \right) + \bm{\lambda}^T \bm{A}_{.,n}
+\end{equation*}
+
+where $\bm{A}_{.,n}$ is the $n$-th column of $\bm{A}$.
+
+\textbf{First method: $M$ unknown $\bm{\lambda}$}
+
+We get the raked values:
+
+\begin{equation*}
+\mu_n = x_n \left( 1 - q_n \bm{\lambda}^T \bm{A}_{.,n} \right)
+\end{equation*}
+
+Using the constraint, we get:
+
+\begin{equation*}
+\bm{A} \left[ \bm{x} \odot \left( \bm{1} - \bm{q} \odot \left( \bm{A}^T \bm{\lambda} \right) \right) \right] = \bm{y}
+\end{equation*}
+
+We denote:
+
+\begin{equation*}
+\bm{\Phi} = \bm{A} \text{diag} \left[ \bm{x} \odot \bm{q} \right] \bm{A}^T  \text{ and } \hat{\bm{y}} = \bm{A} \bm{x}
+\end{equation*}
+
+thus we need to solve:
+
+\begin{equation*}
+\bm{\Phi} \bm{\lambda} = \hat{\bm{y}} - \bm{y}
+\end{equation*}
+
+If the matrix $\bm{\Phi}$ is invertible, we get:
+
+\begin{equation*}
+\bm{\lambda} = \bm{\Phi} ^{-1} \left( \hat{\bm{y}} - \bm{y} \right)
+\end{equation*}
+
+If the matrix $\bm{\Phi}$ is not invertible, we use its Moore-Penrose pseudoinverse $\bm{\Phi}^+$ and get the solution:
+
+\begin{equation*}
+\bm{\lambda} = \bm{\Phi} ^+ \left( \hat{\bm{y}} - \bm{y} \right)
+\end{equation*}
+
+\textbf{Second method: $N + M$ unknowns $\bm{\mu}$ and $\bm{\lambda}$}
+
+We can also write the problem as a system of $N + M$ linear equations:
+
+\begin{align*}
+\frac{\mu_1}{q_1 x_1} + \bm{\lambda}^T \bm{A}_{.,1} &= \frac{1}{q_1} \\
+\cdots & \\
+\frac{\mu_N}{q_N x_n} + \bm{\lambda}^T \bm{A}_{.,N} &= \frac{1}{q_N} \\
+\bm{A}_{1,.}^T \bm{\mu} &= y_1 \\
+\cdots & \\
+\bm{A}_{M,.}^T \bm{\mu} &= y_M
+\end{align*}
+
+which can be re-written as:
+
+\begin{equation*}
+\begin{pmatrix} \text{diag} \left( \frac{1}{\bm{q} \odot \bm{x}} \right) & \bm{A}^T \\ \bm{A} & \bm{0}_{M \times M} \end{pmatrix} \begin{pmatrix} \bm{\mu} \\ \bm{\lambda} \end{pmatrix} = \begin{pmatrix} \frac{1}{\bm{q}} \\ \bm{y} \end{pmatrix}
+\end{equation*}
+
+\subsubsection{Dual problem}
+
+Another way of solving this problem is to write the dual problem:
+
+\begin{align*}
+& \min_{\bm{\mu}} \sup_{\bm{\lambda}} \left( \frac{1}{\bm{q}} \right)^T \left[ \left( \frac{1}{2 \bm{x}} \right) \odot \left( \bm{\mu} - \bm{x} \right)^{\odot 2} \right] + \bm{\lambda}^T \left( \bm{A} \bm{\mu} - \bm{y} \right) \geq \\
+& \sup_{\bm{\lambda}} - \bm{\lambda}^T \bm{y} - \sup_{\bm{\mu}} - \bm{\lambda}^T \bm{A} \bm{\mu} - \left( \frac{1}{\bm{q}} \right)^T \left[ \left( \frac{1}{2 \bm{x}} \right) \odot \left( \bm{\mu} - \bm{x} \right)^{\odot 2} \right] = \\
+& \sup_{\bm{\lambda}} - \bm{\lambda}^T \bm{y} -  \bm{1}^T \left[ f^* \left( - \bm{A}^T \bm{\lambda} \right) \right]
+\end{align*}
+
+where:
+
+\begin{equation*}
+f^* \left( z \right) = \sup_{\mu} \mu z - \frac{\left( \mu - x \right)^2}{2 q x}
+\end{equation*}
+
+Taking the derivative of $f^*$ with respect to $\mu$, we get:
+
+\begin{equation*}
+\frac{\partial f^* \left( z \right)}{\partial \mu} = 0 = z - \frac{1}{q} \left( \frac{\mu}{x} - 1 \right)
+\end{equation*}
+
+which gives us:
+
+\begin{equation*}
+\mu = x \left( 1 + q z \right)
+\end{equation*}
+
+and:
+
+\begin{equation*}
+f^* \left( z \right) = x z \left( 1 + \frac{q z}{2} \right)
+\end{equation*}
+
+Its derivative is:
+
+\begin{equation*}
+f^{* \left( 1 \right)} \left( z \right) = x \left( 1 + q z \right)
+\end{equation*}
+
+The dual can be written as a minimization problem:
+
+\begin{equation*}
+\min_{\bm{\lambda}} \bm{\lambda}^T \bm{y} + \bm{1}^T \left[ f^* \left( - \bm{A}^T \bm{\lambda} \right) \right] 
+\end{equation*}
+
+Taking the derivative with respect to $\bm{\lambda}$, we have:
+
+\begin{equation*}
+\bm{y} = \bm{A} \left[ f^{* \left( 1 \right)} \left( - \bm{A}^T \bm{\lambda} \right) \right]
+\end{equation*}
+
+which immediately gives us:
+
+\begin{equation*}
+\mu_n = f_n^{* \left( 1 \right)} \left( - \bm{\lambda}^T \bm{A}_{.,n} \right) = x_n \left( 1 - q_n \bm{\lambda}^T \bm{A}_{.n} \right)
+\end{equation*}
+
+that is we get back to the solution of the primal problem.
+
+\subsection{$\mathcal{L}_2$ distance}
+
+We take:
+
+\begin{equation*}
+G \left( \mu , x \right) = \frac{1}{2} \left( \mu - x \right) ^2 \text{ and } g \left( \mu , x \right) = \frac{\partial G \left( \mu , x \right)}{\partial \mu} = \mu - x
+\end{equation*}
+
+\subsubsection{Primal problem}
+
+We can write the Lagrangian:
+
+\begin{equation*}
+\mathcal{L} \left( \bm{\mu} , \bm{\lambda} \right) = \left( \frac{1}{\bm{q}} \right)^T \left[ \frac{1}{2} \left( \bm{\mu} - \bm{x} \right)^{\odot 2} \right] + \bm{\lambda}^T \left( \bm{A} \bm{\mu} - \bm{y} \right)
+\end{equation*}
+
+If we write that the partial derivatives with respect to the $\mu_n$ are equal to $0$, we get:
+
+\begin{equation*}
+\frac{\partial \mathcal{L} \left( \bm{\mu} , \bm{\lambda} \right)}{\partial \mu_n} = 0 =
+\frac{\mu_n - x_n}{q_n} + \bm{\lambda}^T \bm{A}_{.,n}
+\end{equation*}
+
+where $\bm{A}_{.,n}$ is the $n$-th column of $\bm{A}$.
+
+\textbf{First method: $M$ unknown $\bm{\lambda}$}
+
+We get the raked values:
+
+\begin{equation*}
+\mu_n = x_n - q_n \bm{\lambda}^T \bm{A}_{.,n}
+\end{equation*}
+
+Using the constraint, we get:
+
+\begin{equation*}
+\bm{A} \left[ \bm{x} - \bm{q} \odot \left( \bm{A}^T \bm{\lambda} \right) \right] = \bm{y}
+\end{equation*}
+
+We denote:
+
+\begin{equation*}
+\bm{\Phi} = \bm{A} \text{diag} \left( \bm{q} \right) \bm{A}^T  \text{ and } \hat{\bm{y}} = \bm{A} \bm{x}
+\end{equation*}
+
+thus we need to solve:
+
+\begin{equation*}
+\bm{\Phi} \bm{\lambda} = \hat{\bm{y}} - \bm{y}
+\end{equation*}
+
+If the matrix $\bm{\Phi}$ is invertible, we get:
+
+\begin{equation*}
+\bm{\lambda} = \bm{\Phi} ^{-1} \left( \hat{\bm{y}} - \bm{y} \right)
+\end{equation*}
+
+If the matrix $\bm{\Phi}$ is not invertible, we use its Moore-Penrose pseudoinverse $\bm{\Phi}^+$ and get the solution:
+
+\begin{equation*}
+\bm{\lambda} = \bm{\Phi} ^+ \left( \hat{\bm{y}} - \bm{y} \right)
+\end{equation*}
+
+\textbf{Second method: $N + M$ unknowns $\bm{\mu}$ and $\bm{\lambda}$}
+
+We can also write the problem as a system of $N + M$ linear equations:
+
+\begin{align*}
+\frac{\mu_1}{q_1} + \bm{\lambda}^T \bm{A}_{.,1} &= \frac{x_1}{q_1} \\
+\cdots & \\
+\frac{\mu_N}{q_N} + \bm{\lambda}^T \bm{A}_{.,N} &= \frac{x_N}{q_N} \\
+\bm{A}_{1,.}^T \bm{\mu} &= y_1 \\
+\cdots & \\
+\bm{A}_{M,.}^T \bm{\mu} &= y_M
+\end{align*}
+
+which can be re-written as:
+
+\begin{equation*}
+\begin{pmatrix} \text{diag} \left( \frac{1}{\bm{q}} \right) & \bm{A}^T \\ \bm{A} & \bm{0}_{M \times M} \end{pmatrix} \begin{pmatrix} \bm{\mu} \\ \bm{\lambda} \end{pmatrix} = \begin{pmatrix} \frac{\bm{x}}{\bm{q}} \\ \bm{y} \end{pmatrix}
+\end{equation*}
+
+\subsubsection{Dual problem}
+
+Another way of solving this problem is to write the dual problem:
+
+\begin{align*}
+& \min_{\bm{\mu}} \sup_{\bm{\lambda}} \left( \frac{1}{\bm{q}} \right)^T \left[ \frac{1}{2} \left( \bm{\mu} - \bm{x} \right)^{\odot 2} \right] + \bm{\lambda}^T \left( \bm{A} \bm{\mu} - \bm{y} \right) \geq \\
+& \sup_{\bm{\lambda}} - \bm{\lambda}^T \bm{y} - \sup_{\bm{\mu}} - \bm{\lambda}^T \bm{A} \bm{\mu} - \left( \frac{1}{\bm{q}} \right)^T \left[ \frac{1}{2} \left( \bm{\mu} - \bm{x} \right)^{\odot 2} \right] = \\
+& \sup_{\bm{\lambda}} - \bm{\lambda}^T \bm{y} -  \bm{1}^T \left[ f^* \left( - \bm{A}^T \bm{\lambda} \right) \right]
+\end{align*}
+
+where:
+
+\begin{equation*}
+f^* \left( z \right) = \sup_{\mu} \mu z - \frac{\left( \mu - x \right)^2}{2 q}
+\end{equation*}
+
+Taking the derivative of $f^*$ with respect to $\mu$, we get:
+
+\begin{equation*}
+\frac{\partial f^* \left( z \right)}{\partial \mu} = 0 = z - \frac{\mu - x}{q}
+\end{equation*}
+
+which gives us:
+
+\begin{equation*}
+\mu = x + q z
+\end{equation*}
+
+and:
+
+\begin{equation*}
+f^* \left( z \right) = z \left( x + \frac{q z}{2} \right)
+\end{equation*}
+
+Its derivative is:
+
+\begin{equation*}
+f^{* \left( 1 \right)} \left( z \right) = x + q z
+\end{equation*}
+
+The dual can be written as a minimization problem:
+
+\begin{equation*}
+\min_{\bm{\lambda}} \bm{\lambda}^T \bm{y} + \bm{1}^T \left[ f^* \left( - \bm{A}^T \bm{\lambda} \right) \right] 
+\end{equation*}
+
+Taking the derivative with respect to $\bm{\lambda}$, we have:
+
+\begin{equation*}
+\bm{y} = \bm{A} \left[ f^{* \left( 1 \right)} \left( - \bm{A}^T \bm{\lambda} \right) \right]
+\end{equation*}
+
+which immediately gives us:
+
+\begin{equation*}
+\mu_n = f_n^{* \left( 1 \right)} \left( - \bm{\lambda}^T \bm{A}_{.,n} \right) = x_n - q_n \bm{\lambda}^T \bm{A}_{.n}
+\end{equation*}
+
+that is we get back to the solution of the primal problem.
+
+\subsection{Entropic distance}
+
+We take:
+
+\begin{equation*}
+G \left( \mu , x \right) = \mu \log \left( \frac{\mu}{x} \right) - \mu + x \text{ and } g \left( \mu , x \right) = \frac{\partial G \left( \mu , x \right)}{\partial \mu} = \log \left( \frac{\mu}{x} \right)
+\end{equation*}
+
+\subsubsection{Primal problem}
+
+We can write the Lagrangian:
+
+\begin{equation*}
+\mathcal{L} \left( \bm{\mu} , \bm{\lambda} \right) = \left( \frac{1}{\bm{q}} \right)^T \left( \bm{\mu} \odot \log \left( \frac{\bm{\mu}}{\bm{x}} \right) - \bm{\mu} + \bm{x} \right) + \bm{\lambda}^T \left( \bm{A} \bm{\mu} - \bm{y} \right)
+\end{equation*}
+
+If we write that the partial derivatives with respect to the $\mu_n$ are equal to $0$, we get:
+
+\begin{equation*}
+\frac{\partial \mathcal{L} \left( \bm{\mu} , \bm{\lambda} \right)}{\partial \mu_n} = 0 =
+\frac{1}{q_n} \log \left( \frac{\mu_n}{x_n} \right) + \bm{\lambda}^T \bm{A}_{.,n}
+\end{equation*}
+
+where $\bm{A}_{.,n}$ is the $n$-th column of $\bm{A}$ .
+
+\textbf{First method: $M$ unknowns $\bm{\lambda}$}
+
+We get the raked values:
+
+\begin{equation*}
+\mu_n = x_n \exp \left( - q_n \bm{\lambda}^T \bm{A}_{.,n} \right)
+\end{equation*}
+
+Using the constraint, we get:
+
+\begin{equation*}
+\bm{A} \left[ \bm{x} \odot \exp \left( - \bm{q} \odot \left( \bm{A}^T \bm{\lambda} \right) \right) \right] = \bm{y}
+\end{equation*}
+
+We use Newton’s method to solve this last equation for $\bm{\lambda}$. We denote:
+
+\begin{equation*}
+\bm{\Phi} \left( \bm{\lambda} \right) = \bm{A} \bm{x} - \bm{A} \left[ \bm{x} \odot \exp \left( - \bm{q} \odot \left( \bm{A}^T \bm{\lambda} \right) \right) \right] \text{ and } \hat{\bm{y}} = \bm{A} \bm{x}
+\end{equation*}
+
+thus we need to solve:
+
+\begin{equation*}
+\bm{\Phi} \left( \bm{\lambda} \right) - \hat{\bm{y}} + \bm{y} = \bm{0}
+\end{equation*}
+
+We start at $\bm{\lambda}^0 = \bm{0}$ and we iterate:
+
+\begin{equation*}
+\bm{\lambda}^{k + 1} = \bm{\lambda}^k - \left( \nabla_{\bm{\lambda}} \bm{\Phi} \left( \bm{\lambda} \right) \right) ^{-1} \left( \bm{\Phi} \left( \bm{\lambda} \right) - \hat{\bm{y}} + \bm{y} \right)
+\end{equation*}
+
+with:
+
+\begin{equation*}
+\nabla_{\bm{\lambda}} \bm{\Phi} \left( \bm{\lambda} \right) = \bm{A} \text{diag} \left[ \bm{x} \odot \bm{q} \odot \exp \left( - \bm{q} \odot \left( \bm{A}^T \bm{\lambda} \right) \right) \right] \bm{A}^T
+\end{equation*}
+
+\textbf{Second method: $N + M$ unknowns $\bm{\mu}$ and $\bm{\lambda}$}
+
+We can also write the problem as a system of $N + M$ linear equations:
+
+\begin{align*}
+\frac{1}{q_1} \log \left( \frac{\mu_1}{x_1} \right) + \bm{\lambda}^T \bm{A}_{.,1} &= 0 \\
+\cdots & \\
+\frac{1}{q_N} \log \left( \frac{\mu_N}{x_N} \right) + \bm{\lambda}^T \bm{A}_{.,N} &= 0 \\
+\bm{A}_{1,.}^T \bm{\mu} - y_1 &= 0 \\
+\cdots & \\
+\bm{A}_{M,.}^T \bm{\mu} - y_M &= 0
+\end{align*}
+
+Using Newton's method, we have:
+
+\begin{equation*}
+\begin{pmatrix} \bm{\mu}^{k + 1} \\ \bm{\lambda}^{k + 1} \end{pmatrix} = \begin{pmatrix} \bm{\mu}^k \\ \bm{\lambda}^k \end{pmatrix} - \left[ \nabla \bm{H} \left( \bm{\mu}^k , \bm{\lambda}^k \right) \right] ^{-1} \bm{H} \left( \bm{\mu}^k , \bm{\lambda}^k \right)
+\end{equation*}
+
+where:
+
+\begin{equation*}
+\bm{H} \left( \bm{\mu} , \bm{\lambda} \right) = \begin{pmatrix} \frac{1}{\bm{q}} \odot \log \left( \frac{\bm{\mu}}{\bm{x}} \right) + \bm{A}^T \bm{\lambda} \\ \bm{A} \bm{\mu} - \bm{y} \end{pmatrix}
+\end{equation*}
+
+We have:
+
+\begin{equation*}
+\frac{\partial \left( \frac{1}{q_n} \log \left( \frac{\mu_n}{x_n} \right) + \bm{\lambda}^T \bm{A}_{.,n} \right)}{\partial \mu_l} =
+\begin{cases}
+0 & \text{if } n \neq l \\
+\frac{1}{q_n \mu_n} & \text{if } n = l
+\end{cases}
+\end{equation*}
+
+\begin{equation*}
+\frac{\partial \left( \frac{1}{q_n} \log \left( \frac{\mu_n}{x_n} \right) + \bm{\lambda}^T \bm{A}_{.,n} \right)}{\partial \lambda_m} = A_{mn}
+\end{equation*}
+
+\begin{equation*}
+\frac{\partial \left( \bm{A}_{m,.}^T \bm{\mu} - y_m \right)}{\partial \mu_n} = A_{mn}
+\end{equation*}
+
+\begin{equation*}
+\frac{\partial \left( \bm{A}_{m,.}^T \bm{\mu} - y_m \right)}{\partial \lambda_l} = 0
+\end{equation*}
+
+thus the iterations become:
+
+\begin{equation*}
+\begin{pmatrix} \bm{\mu}^{k + 1} \\ \bm{\lambda}^{k + 1} \end{pmatrix} = \begin{pmatrix} \bm{\mu}^k \\ \bm{\lambda}^k \end{pmatrix} - \begin{pmatrix} \text{diag} \left( \frac{1}{\bm{q} \odot \bm{\mu}} \right)  & \bm{A}^T \\ \bm{A} & \bm{0}_{m \times m} \end{pmatrix} ^{-1} \begin{pmatrix} \frac{1}{\bm{q}} \odot \log \left( \frac{\bm{\mu}^k}{\bm{x}} \right) + \bm{A}^T \bm{\lambda}^k \\ \bm{A} \bm{\mu} - \bm{y} \end{pmatrix}
+\end{equation*}
+
+\subsubsection{Dual problem}
+
+Another way of solving this problem is to write the dual problem:
+
+\begin{align*}
+& \min_{\bm{\mu}} \sup_{\bm{\lambda}} \left( \frac{1}{\bm{q}} \right)^T \left( \bm{\mu} \odot \log \left( \frac{\bm{\mu}}{\bm{x}} \right) - \bm{\mu} + \bm{x} \right) + \bm{\lambda}^T \left( \bm{A} \bm{\mu} - \bm{y} \right) \geq \\
+& \sup_{\bm{\lambda}} - \bm{\lambda}^T \bm{y} - \sup_{\bm{\mu}} - \bm{\lambda}^T \bm{A} \bm{\mu} - \left( \frac{1}{\bm{q}} \right)^T \left( \bm{\mu} \odot \log \left( \frac{\bm{\mu}}{\bm{x}} \right) - \bm{\mu} + \bm{x} \right) = \\
+& \sup_{\bm{\lambda}} - \bm{\lambda}^T \bm{y} -  \bm{1}^T \left[ f^* \left( - \bm{A}^T \bm{\lambda} \right) \right]
+\end{align*}
+
+where:
+
+\begin{equation*}
+f^* \left( z \right) = \sup_{\mu} \mu z - \frac{1}{q} \left( \mu \log \left( \frac{\mu}{x} \right) - \mu + x \right)
+\end{equation*}
+
+Taking the derivative of $f^*$ with respect to $\mu$, we get:
+
+\begin{equation*}
+\frac{\partial f^* \left( z \right)}{\partial \mu} = 0 = z - \frac{1}{q} \log \left( \frac{\mu}{x} \right)
+\end{equation*}
+
+which gives us:
+
+\begin{equation*}
+\mu = x \exp \left( q z \right)
+\end{equation*}
+
+and:
+
+\begin{equation*}
+f^* \left( z \right) = \frac{x}{q} \left( \exp \left( q z \right) - 1 \right)
+\end{equation*}
+
+Its derivative is:
+
+\begin{equation*}
+f^{* \left( 1 \right)} \left( z \right) = x \exp \left( q z \right)
+\end{equation*}
+
+The dual can be written as a minimization problem:
+
+\begin{equation*}
+\min_{\bm{\lambda}} \bm{\lambda}^T \bm{y} + \bm{1}^T \left[ f^* \left( - \bm{A}^T \bm{\lambda} \right) \right] 
+\end{equation*}
+
+Taking the derivative with respect to $\bm{\lambda}$, we have:
+
+\begin{equation*}
+\bm{y} = \bm{A} \left[ f^{* \left( 1 \right)} \left( - \bm{A}^T \bm{\lambda} \right) \right]
+\end{equation*}
+
+which immediately gives us:
+
+\begin{equation*}
+\mu_n = f_n^{* \left( 1 \right)} \left( - \bm{\lambda}^T \bm{A}_{.,n} \right) = x_n \exp \left( - q_n \bm{\lambda}^T \bm{A}_{.n} \right)
+\end{equation*}
+
+that is we get back to the solution of the primal problem.
+
+\subsection{A more general distance}
+
+We take:
+
+\begin{equation*}
+G \left( \mu , x \right) = \frac{1}{\alpha} \left[ \frac{x}{\alpha + 1} \left( \frac{\mu}{x} \right) ^{\alpha + 1} - \mu + c \right] \text{ and } g \left( \mu , x \right) = \frac{\partial G \left( \mu , x \right)}{\partial \mu} = \frac{1}{\alpha} \left[ \left( \frac{\mu}{x} \right) ^{\alpha} - 1\right]
+\end{equation*}
+
+\subsubsection{Primal problem}
+
+We can write the Lagrangian:
+
+\begin{equation*}
+\mathcal{L} \left( \bm{\mu} , \bm{\lambda} \right) = \frac{1}{\alpha} \left( \frac{1}{\bm{q}} \right)^T \left[ \frac{1}{\alpha + 1} \bm{x} \odot \left( \frac{\bm{\mu}}{\bm{x}} \right) ^{\alpha + 1} - \bm{\mu} + c \right] + \bm{\lambda}^T \left( \bm{A} \bm{\mu} - \bm{y} \right)
+\end{equation*}
+
+If we write that the partial derivatives with respect to the $\mu_n$ are equal to $0$, we get:
+
+\begin{equation*}
+\frac{\partial \mathcal{L} \left( \bm{\mu} , \bm{\lambda} \right)}{\partial \mu_n} = 0 =
+\frac{1}{\alpha q_n} \left[ \left( \frac{\mu_n}{x_n} \right) ^{\alpha} - 1\right] + \bm{\lambda}^T \bm{A}_{.,n}
+\end{equation*}
+
+where $\bm{A}_{.,n}$ is the $n$-th column of $\bm{A}$ .
+
+\textbf{First method: $M$ unknowns $\bm{\lambda}$}
+
+We get the raked values:
+
+\begin{equation*}
+\mu_n = x_n \left( 1 - \alpha q_n \bm{\lambda}^T \bm{A}_{.,n} \right)^{\frac{1}{\alpha}}
+\end{equation*}
+
+Using the constraint, we get:
+
+\begin{equation*}
+\bm{A} \left[ \bm{x} \odot \left( 1 - \alpha \bm{q} \odot \left( \bm{A}^T \bm{\lambda} \right) \right)^{\frac{1}{\alpha}} \right] = \bm{y}
+\end{equation*}
+
+We use Newton’s method to solve this last equation for $\bm{\lambda}$. We denote:
+
+\begin{equation*}
+\bm{\Phi} \left( \bm{\lambda} \right) = \bm{A} \bm{x} - \bm{A} \left[ \bm{x} \odot \left( 1 - \alpha \bm{q} \odot \left( \bm{A}^T \bm{\lambda} \right) \right)^{\frac{1}{\alpha}} \right] \text{ and } \hat{\bm{y}} = \bm{A} \bm{x}
+\end{equation*}
+
+thus we need to solve:
+
+\begin{equation*}
+\bm{\Phi} \left( \bm{\lambda} \right) - \hat{\bm{y}} + \bm{y} = \bm{0}
+\end{equation*}
+
+We start at $\bm{\lambda}^0 = \bm{0}$ and we iterate:
+
+\begin{equation*}
+\bm{\lambda}^{k + 1} = \bm{\lambda}^k - \left( \nabla_{\bm{\lambda}} \bm{\Phi} \left( \bm{\lambda} \right) \right) ^{-1} \left( \bm{\Phi} \left( \bm{\lambda} \right) - \hat{\bm{y}} + \bm{y} \right)
+\end{equation*}
+
+with:
+
+\begin{equation*}
+\nabla_{\bm{\lambda}} \bm{\Phi} \left( \bm{\lambda} \right) = \bm{A} \text{diag} \left[ \bm{x} \odot \bm{q} \odot \left( 1 - \bm{q} \odot \left( \bm{A}^T \bm{\lambda} \right) \right)^{\frac{1}{\alpha} - 1} \right] \bm{A}^T
+\end{equation*}
+
+\textbf{Second method: $N + M$ unknowns $\bm{\mu}$ and $\bm{\lambda}$}
+
+We can also write the problem as a system of $N + M$ linear equations:
+
+\begin{align*}
+\frac{1}{\alpha q_1} \left[ \left( \frac{\mu_1}{x_1} \right) ^{\alpha} - 1\right] + \bm{\lambda}^T \bm{A}_{.,1} &= 0 \\
+\cdots & \\
+\frac{1}{\alpha q_N} \left[ \left( \frac{\mu_N}{x_N} \right) ^{\alpha} - 1\right] + \bm{\lambda}^T \bm{A}_{.,N} &= 0 \\
+\bm{A}_{1,.}^T \bm{\mu} - y_1 &= 0 \\
+\cdots & \\
+\bm{A}_{M,.}^T \bm{\mu} - y_M &= 0
+\end{align*}
+
+Using Newton's method, we have:
+
+\begin{equation*}
+\begin{pmatrix} \bm{\mu}^{k + 1} \\ \bm{\lambda}^{k + 1} \end{pmatrix} = \begin{pmatrix} \bm{\mu}^k \\ \bm{\lambda}^k \end{pmatrix} - \left[ \nabla \bm{H} \left( \bm{\mu}^k , \bm{\lambda}^k \right) \right] ^{-1} \bm{H} \left( \bm{\mu}^k , \bm{\lambda}^k \right)
+\end{equation*}
+
+where:
+
+\begin{equation*}
+\bm{H} \left( \bm{\mu} , \bm{\lambda} \right) = \begin{pmatrix} \frac{1}{\alpha \bm{q}} \odot \left[ \left( \frac{\bm{\mu}}{\bm{x}} \right)^{\alpha} - 1 \right] + \bm{A}^T \bm{\lambda} \\ \bm{A} \bm{\mu} - \bm{y} \end{pmatrix}
+\end{equation*}
+
+We have:
+
+\begin{equation*}
+\frac{\partial \left( \frac{1}{\alpha q_n} \left[ \left( \frac{\mu_n}{x_n} \right) ^{\alpha} - 1\right] + \bm{\lambda}^T \bm{A}_{.,n} \right)}{\partial \mu_l} =
+\begin{cases}
+0 & \text{if } n \neq l \\
+\frac{1}{q_n x_n} \left( \frac{\mu_n}{x_n} \right)^{\alpha - 1} & \text{if } n = l
+\end{cases}
+\end{equation*}
+
+\begin{equation*}
+\frac{\partial \left( \frac{1}{\alpha q_n} \left[ \left( \frac{\mu_n}{x_n} \right) ^{\alpha} - 1\right] + \bm{\lambda}^T \bm{A}_{.,n} \right)}{\partial \lambda_m} = A_{mn}
+\end{equation*}
+
+\begin{equation*}
+\frac{\partial \left( \bm{A}_{m,.}^T \bm{\mu} - y_m \right)}{\partial \mu_n} = A_{mn}
+\end{equation*}
+
+\begin{equation*}
+\frac{\partial \left( \bm{A}_{m,.}^T \bm{\mu} - y_m \right)}{\partial \lambda_l} = 0
+\end{equation*}
+
+thus the iterations become:
+
+\begin{equation*}
+\begin{pmatrix} \bm{\mu}^{k + 1} \\ \bm{\lambda}^{k + 1} \end{pmatrix} = \begin{pmatrix} \bm{\mu}^k \\ \bm{\lambda}^k \end{pmatrix} - \begin{pmatrix} \text{diag} \left( \frac{1}{\bm{q} \odot \bm{x}} \odot \left( \frac{\bm{\mu}}{\bm{x}} \right)^{\alpha - 1} \right)  & \bm{A}^T \\ \bm{A} & \bm{0}_{m \times m} \end{pmatrix} ^{-1} \begin{pmatrix} \frac{1}{\alpha \bm{q}} \odot \left[ \left( \frac{\bm{\mu}^k}{\bm{x}} \right)^{\alpha} - 1\right] + \bm{A}^T \bm{\lambda}^k \\ \bm{A} \bm{\mu} - \bm{y} \end{pmatrix}
+\end{equation*}
+
+\subsubsection{Dual problem}
+
+Another way of solving this problem is to write the dual problem:
+
+\begin{align*}
+& \min_{\bm{\mu}} \sup_{\bm{\lambda}} \frac{1}{\alpha} \left( \frac{1}{\bm{q}} \right)^T \left[ \frac{1}{\alpha + 1} \bm{x} \odot \left( \frac{\bm{\mu}}{\bm{x}} \right) ^{\alpha + 1} - \bm{\mu} + c \right] + \bm{\lambda}^T \left( \bm{A} \bm{\mu} - \bm{y} \right) \geq \\
+& \sup_{\bm{\lambda}} - \bm{\lambda}^T \bm{y} - \sup_{\bm{\mu}} - \bm{\lambda}^T \bm{A} \bm{\mu} - \frac{1}{\alpha} \left( \frac{1}{\bm{q}} \right)^T \left[ \frac{1}{\alpha + 1} \bm{x} \odot \left( \frac{\bm{\mu}}{\bm{x}} \right) ^{\alpha + 1} - \bm{\mu} + c \right] = \\
+& \sup_{\bm{\lambda}} - \bm{\lambda}^T \bm{y} -  \bm{1}^T \left[ f^* \left( - \bm{A}^T \bm{\lambda} \right) \right]
+\end{align*}
+
+where:
+
+\begin{equation*}
+f^* \left( z \right) = \sup_{\mu} \mu z - \frac{1}{\alpha q} \left[ \frac{x}{\alpha + 1} \left( \frac{\mu}{x} \right) ^{\alpha + 1} - \mu + c \right]
+\end{equation*}
+
+Taking the derivative of $f^*$ with respect to $\mu$, we get:
+
+\begin{equation*}
+\frac{\partial f^* \left( z \right)}{\partial \mu} = 0 = z - \frac{1}{\alpha q} \left[ \left( \frac{\mu}{x} \right)^{\alpha} - 1 \right]
+\end{equation*}
+
+which gives us:
+
+\begin{equation*}
+\mu = x \left( 1 + \alpha q z \right)^{\frac{1}{\alpha}}
+\end{equation*}
+
+and:
+
+\begin{equation*}
+f^* \left( z \right) = \frac{x}{q \left( \alpha + 1 \right)} \left( 1 + \alpha q z \right)^{\frac{1}{\alpha} + 1}
+\end{equation*}
+
+Its derivative is:
+
+\begin{equation*}
+f^{* \left( 1 \right)} \left( z \right) = x \left( 1 + \alpha q z \right)^{\frac{1}{\alpha}}
+\end{equation*}
+
+The dual can be written as a minimization problem:
+
+\begin{equation*}
+\min_{\bm{\lambda}} \bm{\lambda}^T \bm{y} + \bm{1}^T \left[ f^* \left( - \bm{A}^T \bm{\lambda} \right) \right] 
+\end{equation*}
+
+Taking the derivative with respect to $\bm{\lambda}$, we have:
+
+\begin{equation*}
+\bm{y} = \bm{A} \left[ f^{* \left( 1 \right)} \left( - \bm{A}^T \bm{\lambda} \right) \right]
+\end{equation*}
+
+which immediately gives us:
+
+\begin{equation*}
+\mu_n = f_n^{* \left( 1 \right)} \left( - \bm{\lambda}^T \bm{A}_{.,n} \right) = x_n \left( 1 - q_n \bm{\lambda}^T \bm{A}_{.n} \right)^{\frac{1}{\alpha}}
+\end{equation*}
+
+that is we get back to the solution of the primal problem.
+
+\subsection{Logit distance}
+
+We want to make sure that all the raked values $\mu$ are bounded by:
+\begin{equation*}
+l_n < \mu_n < h_n
+\end{equation*}
+
+where $\bm{l}$ and $\bm{h}$ are known vectors of length $I$. For example, we could use $\bm{l} = \bm{0}$ for the lower bound and the total population number for the upper bound. We assume that all the data respect the condition $l_n < x_n < h_n$. The distance function becomes:
+
+\begin{equation*}
+G \left( \mu , x \right) = \left( \mu - l  \right) \log \frac{\mu - l}{x - l} + \left( h - \mu \right) \log \frac{h - \mu}{h - x}
+\end{equation*}
+
+Its derivative is:
+
+\begin{equation*}
+g \left( \mu , x \right) = \log \frac{\mu - l}{x - l} - \log \frac{h - \mu}{h - x}
+\end{equation*}
+
+\subsubsection{Primal problem}
+
+We can write the Lagrangian:
+
+\begin{equation*}
+\mathcal{L} \left( \bm{\mu} , \bm{\lambda} \right) = \left( \frac{1}{\bm{q}} \right)^T \left( \left( \bm{\mu} - \bm{l}  \right) \log \frac{\bm{\mu} - \bm{l}}{\bm{x} - \bm{l}} + \left( \bm{h} - \bm{\mu} \right) \log \frac{\bm{h} - \bm{\mu}}{\bm{h} - \bm{x}} \right) + \bm{\lambda}^T \left( \bm{A} \bm{\mu} - \bm{y} \right)
+\end{equation*}
+
+If we write that the partial derivatives with respect to the $\mu_n$ are equal to $0$, we get:
+
+\begin{equation*}
+\frac{\partial \mathcal{L} \left( \bm{\mu} , \bm{\lambda} \right)}{\partial \mu_n} = 0 =
+\frac{1}{q_n} \left( \log \frac{\mu_n - l_n}{x_n - l_n} - \log \frac{h_n - \mu_n}{h_n - x_n} \right) + \bm{\lambda}^T \bm{A}_{.,n}
+\end{equation*}
+
+where $\bm{A}_{.,n}$ is the $n$-th column of $\bm{A}$.
+
+\textbf{First method: $M$ unknowns $\bm{\lambda}$}
+
+We get the raked values:
+
+\begin{equation*}
+\mu_n = \frac{l_n \left( h_n - x_n \right) + h_n \left( x_n - l_n \right) e^{ - q_n \bm{\lambda}^T \bm{A}_{.,n}}}{ \left( h_n - x_n \right) + \left( x_n - l_n \right) e^{ - q_n \bm{\lambda}^T \bm{A}_{.,n}}} 
+\end{equation*}
+
+Using the constraint, we get:
+
+\begin{equation*}
+\bm{A} \left[ \frac{\bm{l} \odot \left( \bm{h} - \bm{x} \right) + \bm{h} \odot \left( \bm{x} - \bm{l} \right) e^{ - \bm{q} \odot \left( \bm{A}^T \lambda \right)}}{ \left( \bm{h} - \bm{x} \right) + \left( \bm{x} - \bm{l} \right) e^{ - \bm{q} \odot \bm{A}^T \bm{\lambda}}} \right] = \bm{y}
+\end{equation*}
+
+We use Newton’s method to solve this last equation for $\bm{\lambda}$. We denote:
+
+\begin{equation*}
+\bm{\Phi} \left( \bm{\lambda} \right) = \bm{A} \bm{x} - \bm{A} \left[ \frac{\bm{l} \odot \left( \bm{h} - \bm{x} \right) + \bm{h} \odot \left( \bm{x} - \bm{l} \right) e^{ - \bm{q} \odot \left( \bm{A}^T \lambda \right)}}{ \left( \bm{h} - \bm{x} \right) + \left( \bm{x} - \bm{l} \right) e^{ - \bm{q} \odot \bm{A}^T \bm{\lambda}}} \right] \text{ and } \hat{\bm{y}} = \bm{A} \bm{x}
+\end{equation*}
+
+thus we need to solve:
+
+\begin{equation*}
+\bm{\Phi} \left( \bm{\lambda} \right) - \hat{\bm{y}} + \bm{y} = \bm{0}
+\end{equation*}
+
+We start at $\bm{\lambda}^0 = \bm{0}$ and we iterate:
+
+\begin{equation*}
+\bm{\lambda}^{k + 1} = \bm{\lambda}^k - \left( \nabla_{\bm{\lambda}} \bm{\Phi} \left( \bm{\lambda} \right) \right) ^{-1} \left( \bm{\Phi} \left( \bm{\lambda} \right) - \hat{\bm{y}} + \bm{y} \right)
+\end{equation*}
+
+with:
+
+\begin{equation*}
+\nabla_{\bm{\lambda}} \bm{\Phi} \left( \bm{\lambda} \right) = \bm{A} \text{diag} \left[ \bm{q} \odot \frac{\left( \bm{h} - \bm{l} \right) \left( \bm{x} - \bm{l} \right) \left( \bm{h} - \bm{x} \right) e^{- \bm{q} \odot \left( \bm{A}^T \bm{\lambda} \right)}}{\left[ \left( \bm{h} - \bm{x} \right) + \left( \bm{x} - \bm{l} \right) e^{- \bm{q} \odot \left( \bm{A}^T \bm{\lambda} \right)} \right]^2} \right] \bm{A}^T
+\end{equation*}
+
+\textbf{Second method: $N + M$ unknowns $\bm{\mu}$ and $\bm{\lambda}$}
+
+We can also write the problem as a system of $N + M$ linear equations:
+
+\begin{align*}
+\frac{1}{q_1} \left( \log \frac{\mu_1 - l_1}{x_1 - l_1} - \log \frac{h_1 - \mu_1}{h_1 - x_1} \right) + \bm{\lambda}^T \bm{A}_{.,1} &= 0 \\
+\cdots & \\
+\frac{1}{q_N} \left( \log \frac{\mu_N - l_N}{x_N - l_N} - \log \frac{h_N - \mu_N}{h_N - x_N} \right) + \bm{\lambda}^T \bm{A}_{.,N} &= 0 \\
+\bm{A}_{1,.}^T \bm{\mu} - y_1 &= 0 \\
+\cdots & \\
+\bm{A}_{M,.}^T \bm{\mu} - y_M &= 0
+\end{align*}
+
+Using Newton's method, we have:
+
+\begin{equation*}
+\begin{pmatrix} \mu_1^{k + 1} \\ \vdots \\ \mu_N^{k + 1} \\ \lambda_1^{k + 1} \\ \vdots \\ \lambda_M^{k + 1} \end{pmatrix} = \begin{pmatrix} \mu_1^k \\ \vdots \\ \mu_N^k \\ \lambda_1^k \\ \vdots \\ \lambda_M^k \end{pmatrix} - \left[ \nabla \bm{H} \left( \bm{\mu}^k , \bm{\lambda}^k \right) \right] ^{-1} \bm{H} \left( \bm{\mu}^k , \bm{\lambda}^k \right)
+\end{equation*}
+
+where:
+
+\begin{equation*}
+\bm{H} \left( \bm{\mu} , \bm{\lambda} \right) = \begin{pmatrix} \frac{1}{q_1} \left( \log \frac{\mu_1 - l_1}{x_1 - l_1} - \log \frac{h_1 - \mu_1}{h_1 - x_1} \right) + \bm{\lambda}^T \bm{A}_{.,1} \\ \vdots \\ \frac{1}{q_N} \left( \log \frac{\mu_N - l_N}{x_N - l_N} - \log \frac{h_N - \mu_N}{h_N - x_N} \right) + \bm{\lambda}^T \bm{A}_{.,N} \\ \bm{A}_{1,.}^T \bm{\mu} - y_1 \\ \vdots \\ \bm{A}_{M,.}^T \bm{\mu} - y_M \end{pmatrix}
+\end{equation*}
+
+We have:
+
+\begin{equation*}
+\frac{\partial \left( \frac{1}{q_n} \left( \log \frac{\mu_n - l_n}{x_n - l_n} - \log \frac{h_n - \mu_n}{h_n - x_n} \right) + \bm{\lambda}^T \bm{A}_{.,n} \right)}{\partial \mu_l} =
+\begin{cases}
+0 & \text{if } n \neq l \\
+\frac{1}{q_n} \left( \frac{1}{\mu_n - l_n} + \frac{1}{h_n - \mu_n} \right) & \text{if } n = l
+\end{cases}
+\end{equation*}
+
+\begin{equation*}
+\frac{\partial \left( \frac{1}{q_n} \left( \log \frac{\mu_n - l_n}{x_n - l_n} - \log \frac{h_n - \mu_n}{h_n - x_n} \right) + \bm{\lambda}^T \bm{A}_{.,n} \right)}{\partial \lambda_m} = A_{mn}
+\end{equation*}
+
+\begin{equation*}
+\frac{\partial \left( \bm{A}_{m,.}^T \bm{\mu} - y_m \right)}{\partial \mu_n} = A_{mn}
+\end{equation*}
+
+\begin{equation*}
+\frac{\partial \left( \bm{A}_{m,.}^T \bm{\mu} - y_m \right)}{\partial \lambda_l} = 0
+\end{equation*}
+
+thus the iterations become:
+
+\begin{equation*}
+\begin{pmatrix} \mu_1^{k + 1} \\ \vdots \\ \mu_N^{k + 1} \\ \lambda_1^{k + 1} \\ \vdots \\ \lambda_M^{k + 1} \end{pmatrix} = \begin{pmatrix} \mu_1^k \\ \vdots \\ \mu_N^k \\ \lambda_1^k \\ \vdots \\ \lambda_M^k \end{pmatrix} - \begin{pmatrix} \text{diag} \left( \frac{1}{q_n} \left( \frac{1}{\mu_n - l_n} + \frac{1}{h_n - \mu_n} \right) \right) & \bm{A}^T \\ \bm{A} & \bm{0}_{m \times m} \end{pmatrix} ^{-1} \begin{pmatrix} \frac{1}{q_1} \left( \log \frac{\mu_1 - l_1}{x_1 - l_1} - \log \frac{h_1 - \mu_1}{h_1 - x_1} \right) + \bm{\lambda}^T \bm{A}_{.,1} \\ \vdots \\ \frac{1}{q_N} \left( \log \frac{\mu_N - l_N}{x_N - l_N} - \log \frac{h_N - \mu_N}{h_N - x_N} \right) + \bm{\lambda}^T \bm{A}_{.,N} \\ \bm{A}_{1,.}^T \bm{\mu} - y_1 \\ \vdots \\ \bm{A}_{M,.}^T \bm{\mu} - y_M \end{pmatrix}
+\end{equation*}
+
+\subsubsection{Dual problem}
+
+Another way of solving this problem is to write the dual problem:
+
+\begin{align*}
+& \min_{\bm{\mu}} \sup_{\bm{\lambda}} \left( \frac{1}{\bm{q}} \right)^T \left( \left( \bm{\mu} - \bm{l}  \right) \odot \log \frac{\bm{\mu} - \bm{l}}{\bm{x} - \bm{l}} + \left( \bm{h} - \bm{\mu} \right) \odot \log \frac{\bm{h} - \bm{\mu}}{\bm{h} - \bm{x}} \right) + \bm{\lambda}^T \left( \bm{A} \bm{\mu} - \bm{y} \right) \geq \\
+& \sup_{\bm{\lambda}} - \bm{\lambda}^T \bm{y} - \sup_{\bm{\mu}} - \bm{\lambda}^T \bm{A} \bm{\mu} - \left( \frac{1}{\bm{q}} \right)^T \left( \left( \bm{\mu} - \bm{l}  \right) \odot \log \frac{\bm{\mu} - \bm{l}}{\bm{x} - \bm{l}} + \left( \bm{h} - \bm{\mu} \right) \odot \log \frac{\bm{h} - \bm{\mu}}{\bm{h} - \bm{x}} \right) = \\
+& \sup_{\bm{\lambda}} - \bm{\lambda}^T \bm{y} -  \bm{1}^T \left[ f^* \left( - \bm{A}^T \bm{\lambda} \right) \right]
+\end{align*}
+
+where:
+
+\begin{equation*}
+f^* \left( z \right) = \sup_{\mu} \mu z - \frac{1}{q} \left( \left( \mu - l  \right) \log \frac{\mu - l}{x - l} + \left( h - \mu \right) \log \frac{h - \mu}{h - x} \right)
+\end{equation*}
+
+Taking the derivative of $f^*$ with respect to $\mu$, we get:
+
+\begin{equation*}
+\frac{\partial f^* \left( z \right)}{\partial \mu} = 0 = z - \frac{1}{q} \left[ \log \frac{\mu - l}{x - l} - \log \frac{h - \mu}{h - x} \right]
+\end{equation*}
+
+which gives us:
+
+\begin{equation*}
+\mu = \frac{l \left( h - x \right) + h \left( x - l \right) e^{q z}}{\left( h - x \right) + \left( x - l \right) e^{q z}}
+\end{equation*}
+
+and:
+
+\begin{equation*}
+f^* \left( z \right) = z F \left( q z \right) - \frac{G \left( F \left( q z \right) , x \right)}{q}
+\end{equation*}
+
+where:
+
+\begin{equation*}
+F \left( u \right) = \frac{l \left( h - x \right) + h \left( x - l \right) e^u}{\left( h - x \right) + \left( x - l \right) e^u}
+\end{equation*}
+
+Its derivative is:
+
+\begin{equation*}
+f^{* \left( 1 \right)} \left( z \right) = F \left( q z \right) = \frac{l \left( h - x \right) + h \left( x - l \right) e^{qz}}{\left( h - x \right) + \left( x - l \right) e^{qz}}
+\end{equation*}
+
+The dual can be written as a minimization problem:
+
+\begin{equation*}
+\min_{\bm{\lambda}} \bm{\lambda}^T \bm{y} + \bm{1}^T \left[ f^* \left( - \bm{A}^T \bm{\lambda} \right) \right] 
+\end{equation*}
+
+Taking the derivative with respect to $\bm{\lambda}$, we have:
+
+\begin{equation*}
+\bm{y} = \bm{A} \left[ f^{* \left( 1 \right)} \left( - \bm{A}^T \bm{\lambda} \right) \right]
+\end{equation*}
+
+which immediately gives us:
+
+\begin{equation*}
+\mu_n = f_n^{* \left( 1 \right)} \left( - \bm{\lambda}^T \bm{A}_{.,n} \right) = \frac{l_n \left( h_n - x_n \right) + h_n \left( x_n - l_n \right) e^{- q_n \bm{\lambda}^T \bm{A}_{.n}}}{\left( h_n - x_n \right) + \left( x_n - l_n \right) e^{- q_n \bm{\lambda}^T \bm{A}_{.n}}}
+\end{equation*}
+
+that is we get back to the solution of the primal problem.
+
+\section{Introducing uncertainty}
+
+\subsection{Using the $\mathcal{L}_2$ distance}
+
+\subsubsection{1-dimensional raking}
+
+We suppose that the $x_i, i = 1 , \cdots , I$ follow a distribution $\mathcal{L} \left( \bar{\mu}_i , \sigma_i \right)$ and that $\mu$ follow a distribution $\mathcal{L} \left( \bar{\mu} , \sigma_{\mu} \right)$. Our aim is to minimize:
+
+\begin{equation*}
+\min_{\bm{\mu}} \sum_{i = 1}^I \frac{1}{2 q_i} \left( \mu_i - x_i \right) ^2
+\end{equation*}
+
+under the constraint:
+
+\begin{equation*}
+\bm{v}^T \bm{\mu} = \mu
+\end{equation*}
+
+We get:
+
+\begin{equation*}
+\lambda = \frac{\sum_{i = 1}^I v_i x_i - \mu}{\sum_{i = 1}^I q_i v_i^2}
+\end{equation*}
+
+and:
+
+\begin{equation*}
+\mu_i = x_i - q_i v_i \lambda
+\end{equation*}
+
+If the $x_i$ and $\mu$ are mutually independent, we can then write the variance:
+
+\begin{equation*}
+\mathbb{V} \left( \lambda \right) = \frac{1}{\left( \sum_{i = 1}^I q_i v_i^2 \right) ^2} \left( \sum_{i = 1}^I v_i^2 \mathbb{V} \left( x_i \right) + \mathbb{V} \left( \mu \right) \right) = \frac{\sum_{i = 1}^I v_i^2 \sigma_i^2 + \sigma_{\mu}^2}{\left( \sum_{i = 1}^I q_i v_i^2 \right) ^2}
+\end{equation*}
+
+and:
+
+\begin{equation*}
+\mathbb{V} \left( \mu_i \right) = \mathbb{V} \left( x_i \right) + q_i^2 v_i^2 \mathbb{V} \left( \lambda \right) = \sigma_i^2 + q_i^2 v_i^2 \frac{\sum_{j = 1}^I v_j^2 \sigma_j^2 + \sigma_{\mu}^2}{\left( \sum_{j = 1}^I q_j v_j^2 \right) ^2}
+\end{equation*}
+
+If the $x_i$ and $\mu$ are not independent, we denote $\bm{\Sigma}$ the covariance matrix of $\bm{x}$ and $\bm{\sigma}$ the vector containing the covariances $Cov \left( x_i , \mu \right)$. We have:
+
+\begin{equation*}
+\mu_i = x_i - q_i v_i \frac{\sum_j v_j x_j - \mu}{\sum_j q_j v_j^2} = x_i + \frac{q_i v_i}{\sum_j q_j v_j^2} \mu - \frac{q_i v_i}{\sum_j q_j v_j^2} \sum_j v_j x_j
+\end{equation*}
+
+from which we can compute the variance:
+
+\begin{align*}
+\mathbb{V} \left( \mu_i \right) & = \mathbb{V} \left( x_i \right) + \left( \frac{q_i v_i}{\sum_j q_j v_j^2} \right) ^2 \mathbb{V} \left( \mu \right) + \left( \frac{q_i v_i}{\sum_j q_j v_j^2} \right) ^2 \mathbb{V} \left( \sum_j v_j x_j \right) \\
+& + 2 Cov \left( x_i, \frac{q_i v_i}{\sum_j q_j v_j^2} \mu \right) + 2 Cov \left( x_i , \frac{q_i v_i}{\sum_j q_j v_j^2} \sum_j v_j x_j \right) + 2 Cov \left( \frac{q_i v_i}{\sum_j q_j v_j^2} \mu , \frac{q_i v_i}{\sum_j q_j v_j^2} \sum_j v_j x_j \right) \\
+& = \bm{\Sigma}_{i,i} + \left( \frac{q_i v_i}{\sum_j q_j v_j^2} \right) ^2 \sigma_{\mu}^2 + \left( \frac{q_i v_i}{\sum_j q_j v_j^2} \right) ^2 \bm{v}^T \bm{\Sigma} \bm{v} \\
+& + 2 \left( \frac{q_i v_i}{\sum_j q_j v_j^2} \right) \bm{\sigma}_i + 2 \left( \frac{q_i v_i}{\sum_j q_j v_j^2} \right) \left( \bm{\Sigma} \bm{v} \right) _i + 2 \left( \frac{q_i v_i}{\sum_j q_j v_j^2} \right) ^2 \bm{v}^T \bm{\sigma}
+\end{align*}
+
+\subsubsection{k-dimensional raking}
+
+We denote $\bm{\Sigma}_{\bm{x}}$ the $N * N$ covariance matrix of the data vector $\bm{x}$, $\bm{\Sigma}_{\bm{y}}$, the $M * M$ covariance matrix of the margins vector $\bm{y}$ and $\bm{\Sigma}_{\bm{x} \bm{y}}$ the $N * M$ covariance matrix of $\bm{x}$ and $\bm{y}$. Our objective is to find $\bm{\Sigma}_{\bm{\mu}}$, the $N * N$ covariance matrix of the raked values vector $\bm{\mu}$. Our aim is to minimize:
+
+\begin{equation*}
+\min_{\bm{\mu}} \left( \frac{1}{\bm{q}} \right)^T \left[ \frac{1}{2} \left( \bm{\mu} - \bm{x} \right)^{\odot 2} \right]
+\end{equation*}
+
+under the constraint:
+
+\begin{equation*}
+\bm{A} \bm{\mu} = \bm{y}
+\end{equation*}
+
+We get:
+
+\begin{equation*}
+\bm{\lambda} = \bm{\Phi} ^{-1} \left( \hat{\bm{y}} - \bm{y} \right) \text{ with } \bm{\Phi} = \bm{A} \text{diag} \left( \bm{q} \right) \bm{A}^T  \text{ and } \hat{\bm{y}} = \bm{A} \bm{x}
+\end{equation*}
+
+and:
+
+\begin{equation*}
+\bm{\mu} = \bm{x} - \bm{q} \odot \left( \bm{A}^T \bm{\lambda} \right) = \bm{x} - \left[ \text{diag} \left( \bm{q} \right) \bm{A}^T \right] \bm{\lambda}
+\end{equation*}
+
+Denoting:
+
+\begin{align*}
+\bm{\Phi}_1 &= \bm{I} - \left[ \text{diag} \left( \bm{q} \right) \bm{A} \right] ^T \left[ \bm{A} \text{diag} \left( \bm{q} \right) \bm{A}^T \right]^{-1} \bm{A} \\
+\bm{\Phi}_2 &= \left[ \text{diag} \left( \bm{q} \right) \bm{A} \right] ^T \left[ \bm{A} \text{diag} \left( \bm{q} \right) \bm{A}^T \right]^{-1}
+\end{align*}
+
+We have:
+
+\begin{equation*}
+\bm{\mu} = \bm{\Phi}_1 \bm{x} + \bm{\Phi_2} \bm{y}
+\end{equation*}
+
+which gives us:
+
+\begin{equation*}
+\bm{\Sigma}_{\bm{\mu}} = \bm{\Phi}_1 \bm{\Sigma}_{\bm{x}} \bm{\Phi}_1^T  + \bm{\Phi}_2 \bm{\Sigma}_{\bm{y}} \bm{\Phi}_2^T + 2 \bm{\Phi}_1 \bm{\Sigma}_{\bm{x} \bm{y}} \bm{\Phi}_2^T
+\end{equation*}
+
+\subsection{Using automatic differentiation}
+
+\subsubsection{Delta method}
+
+Let us suppose that:
+
+\begin{equation*}
+\sqrt{M + N} \left( \begin{pmatrix} \bm{y} \\ \bm{x} \end{pmatrix} - \begin{pmatrix} \bm{m}_{\bm{y}} \\ \bm{m}_{\bm{x}} \end{pmatrix} \right) \xrightarrow[]{d} \mathcal{N} \left( \bm{0} , \begin{pmatrix} \bm{\Sigma}_{\bm{y}} & \bm{\Sigma}_{\bm{y} \bm{x}} \\ \bm{\Sigma}_{\bm{x} \bm{y}} & \bm{\Sigma}_{\bm{x}} \end{pmatrix} \right)
+\end{equation*}
+
+then if we suppose that:
+
+\begin{equation*}
+\mu_n = h_n \left( \bm{y} , \bm{x} \right)
+\end{equation*}
+
+and we denote the gradient:
+
+\begin{equation*}
+\nabla_{\bm{y} , \bm{x}} h_n \left( \bm{y} , \bm{x} \right) = \begin{pmatrix} \frac{\partial h_n \left( \bm{y} , \bm{x} \right)}{\partial y_1} \\ \vdots \\ \frac{\partial h_n \left( \bm{y} , \bm{x} \right)}{\partial y_M} \\ \frac{\partial h_n \left( \bm{y} , \bm{x} \right)}{\partial x_1} \\ \vdots \\ \frac{\partial h_n \left( \bm{y} , \bm{x} \right)}{\partial x_N} \end{pmatrix}
+\end{equation*}
+
+we have:
+
+\begin{equation*}
+\sqrt{M + N} \left( h_n \left( \bm{y} , \bm{x} \right) - h_n \left( \bm{m}_{\bm{y}} , \bm{m}_{\bm{x}} \right) \right) \xrightarrow[]{d} \mathcal{N} \left( \bm{0} , \nabla_{\bm{y} , \bm{x}} h_n \left( \bm{y} , \bm{x} \right)^T \begin{pmatrix} \bm{\Sigma}_{\bm{y}} & \bm{\Sigma}_{\bm{y} \bm{x}} \\ \bm{\Sigma}_{\bm{x} \bm{y}} & \bm{\Sigma}_{\bm{x}} \end{pmatrix} \nabla_{\bm{y} , \bm{x}} h_n \left( \bm{y} , \bm{x} \right) \right)
+\end{equation*}
+
+and:
+
+\begin{equation*}
+\mathbb{V} \left( \mu_n \right) = \nabla_{\bm{y} , \bm{x}} h_n \left( \bm{y} , \bm{x} \right)^T \begin{pmatrix} \bm{\Sigma}_{\bm{y}} & \bm{\Sigma}_{\bm{y} \bm{x}} \\ \bm{\Sigma}_{\bm{x} \bm{y}} & \bm{\Sigma}_{\bm{x}} \end{pmatrix} \nabla_{\bm{y} , \bm{x}} h_n \left( \bm{y} , \bm{x} \right)
+\end{equation*}
+
+\subsubsection{Computing the gradient}
+
+From the solution of the optimization problem, we have:
+
+\begin{equation*}
+\bm{\lambda}^{k + 1} = \bm{\lambda}^k - \left( \nabla_{\bm{\lambda}} \bm{\Phi} \left( \bm{\lambda}^k \right) \right) ^{-1} \left( \bm{\Phi} \left( \bm{\lambda}^k \right) - \hat{\bm{y}} + \bm{y} \right)
+\end{equation*}
+
+with:
+
+\begin{equation*}
+\bm{\Phi} \left( \bm{\lambda}^k \right) = \bm{A} \bm{x} - \bm{A} F \left( - \bm{q} \odot \left( \bm{A}^T \bm{\lambda}^k \right) \right) \text{ and } \hat{\bm{y}} = \bm{A} \bm{x}
+\end{equation*}
+
+and:
+
+\begin{equation*}
+\bm{\mu} = F \left( - \bm{q} \odot \left( \bm{A}^T \bm{\lambda} \right) \right)
+\end{equation*}
+
+We can re-write these two equations as:
+
+\begin{equation*}
+\bm{\lambda}^{k + 1} = \bm{f_1} \left( \bm{\lambda}^k , \bm{x} , \bm{y} \right)
+\end{equation*}
+
+and:
+
+\begin{equation*}
+\bm{\mu} = \bm{f_2} \left( \bm{\lambda} , \bm{x} \right) 
+\end{equation*}
+
+Let us suppose that we have 3 iterations for the Newton's method, we can write $\bm{\mu}$ as a function of $\bm{x}$ and $\bm{y}$:
+
+\begin{equation*}
+\bm{\mu} = \bm{f_2} \left( \bm{f_1} \left( \bm{f_1} \left( \bm{f_1} \left( \bm{x} , \bm{y} \right), \bm{x} , \bm{y} \right), \bm{x} , \bm{y} \right) , \bm{x} \right)
+= \bm{h} \left( \bm{y} , \bm{x} \right)
+\end{equation*} 
+
+We denote $\mu_n = h_n \left( \bm{y} , \bm{x} \right)$. Using automatic differentiation, we can compute numerically:
+
+\begin{equation*}
+\nabla_{\bm{x}} \bm{\mu} = \nabla_{\bm{x}} \bm{h} \left( \bm{y} , \bm{x} \right) \text{ and } \nabla_{\bm{y}} \bm{\mu} = \nabla_{\bm{y}} \bm{h} \left( \bm{y} , \bm{x} \right)
+\end{equation*}
+
+In the case of the chi-square distance and 1-dimensional raking, we can easily compute an explicit formula for the gradient. We have:
+
+\begin{equation*}
+\mu_i = x_i \left( 1 - q_i v_i \frac{\sum_j v_j x_j - \mu}{\sum_j q_j v_j^2 x_j} \right)
+\end{equation*}
+
+thus we get:
+
+\begin{equation*}
+\frac{\partial \mu_i}{\partial \mu} = \frac{q_i v_i x_i}{\sum_j q_j v_j^2 x_j}
+\end{equation*}
+
+\begin{equation*}
+\frac{\partial \mu_i}{\partial x_k} = - q_i v_i x_i \frac{v_k \sum_j q_j v_j^2 x_j - q_k v_k^2 \left( \sum_j v_j x_j - \mu \right)}{\left( \sum_j q_j v_j^2 x_j \right)^2} \text{ if } k \neq i
+\end{equation*}
+
+\begin{equation*}
+\frac{\partial \mu_i}{\partial x_i} = 1 - \frac{q_i v_i}{\left( \sum_j q_j v_j^2 x_j \right)^2} \left[ \left( \sum_j v_j x_j - \mu + x_i v_i \right) \left( \sum_j q_j v_j^2 x_j \right) - q_j v_j^2 x_i \left( \sum_j v_j x_j - \mu \right) \right]
+\end{equation*}
+
+\subsection{Implicit function theorem}
+
+Assume that $S$ is an open subset of $\mathbb{R}^{2 n + 2 m}$ and that $\bm{H} : S \rightarrow \mathbb{R}^{n + m}$ is a function of class $C^1$. Assume also that $\left( \bm{x}_0 , \bm{y}_0 ; \bm{\mu}_0, \bm{\lambda}_0 \right)$ is a point in $S$ such that:
+
+\begin{equation*}
+\bm{H} \left( \bm{x}_0 , \bm{y}_0 ; \bm{\mu}_0, \bm{\lambda}_0 \right) = 0 \text{ and } \text{det} D_{\bm{\mu} , \bm{\lambda}} \bm{H} \left( \bm{x}_0 , \bm{y}_0 ; \bm{\mu}_0, \bm{\lambda}_0 \right) \neq 0
+\end{equation*}
+
+\textbf{i.} Then there exist $r_0 , r_1 > 0$ such that for every $\left( \bm{x} , \bm{y} \right) \in \mathbb{R}^{m + n}$ such that $\left\lVert \left( \bm{x} , \bm{y} \right) - \left( \bm{x}_0 , \bm{y}_0 \right) \right\rVert < r_0$, there exists a unique $\left( \bm{\mu} , \bm{\lambda} \right) \in \mathbb{R}^{n + m}$ such that:
+
+\begin{equation}
+\left\lVert \left( \bm{\mu} , \bm{\lambda} \right) - \left( \bm{\mu}_0 , \bm{\lambda}_0 \right) \right\rVert < r_1 \text{ and } \bm{H} \left( \bm{x} , \bm{y} ; \bm{\mu} , \bm{\lambda} \right) = 0
+\end{equation}
+
+In other words, equation \textbf{(1)} implicitly defines a function $\left( \bm{\mu} , \bm{\lambda} \right) = \bm{h} \left( \bm{x} , \bm{y} \right)$ for $\left( \bm{x} , \bm{y} \right) \in \mathbb{R}^{n + m}$ near $\left( \bm{x}_0 , \bm{y}_0 \right)$, with $\left( \bm{\mu} , \bm{\lambda} \right) = \bm{h} \left( \bm{x} , \bm{y} \right)$ close to $\left( \bm{\mu}_0 , \bm{\lambda}_0 \right)$. Note in particular that $\bm{h} \left( \bm{x}_0 , \bm{y}_0 \right) = \left( \bm{\mu}_0 , \bm{\lambda}_0 \right)$.
+
+\textbf{ii.} Moreover, the function $\bm{h} : B \left( r _0 ; \bm{x} , \bm{y} \right) \rightarrow B \left( r_1 ; \bm{\mu} , \bm{\lambda} \right) \subset \mathbb{R}^{m + n}$
+from part \textbf{(i)} above is of class $C^1$, and its derivatives may be determined by differentiating the identity:
+
+\begin{equation*}
+\bm{H} \left( \bm{x} , \bm{y} ; \bm{h} \left( \bm{x} , \bm{y} \right) \right) = 0
+\end{equation*}
+
+(a consequence of the definition of $\bm{h}$) and solving to find the partial derivatives of $\bm{h}$.
+
+When differentiating $\bm{H} \left( \bm{x} , \bm{y} ; \bm{h} \left( \bm{x} , \bm{y} \right) \right) = 0$ at the solution $\left( \bm{\mu}_0 , \bm{\lambda}_0 \right)$, we get:
+
+\begin{equation*}
+\left[ D_{\bm{\mu} , \bm{\lambda}} \bm{H} \left( \bm{x} , \bm{y} ; \bm{\mu}_0 , \bm{\lambda}_0 \right) \right] \left[ D_{\bm{x} , \bm{y}} \bm{h} \left( \bm{x} , \bm{y} \right) \right] = - \left[ D_{\bm{x} , \bm{y}} \bm{H} \left( \bm{x} , \bm{y} ; \bm{\mu}_0 , \bm{\lambda}_0 \right) \right]
+\end{equation*}
+
+The unknown matrix that we need to compute to get the gradient is:
+
+\begin{equation*}
+D_{\bm{x} , \bm{y}} \bm{h} = \begin{pmatrix} \frac{\partial \bm{\mu}}{\partial \bm{x}} & \frac{\partial \bm{\mu}}{\partial \bm{y}} \\ \frac{\partial \bm{\lambda}}{\partial \bm{x}} & \frac{\partial \bm{\lambda}}{\partial \bm{y}} \end{pmatrix}
+\end{equation*}
+
+and we can compute easily the two other matrices:
+
+\begin{equation*}
+D_{\bm{\mu} , \bm{\lambda}} \bm{H} = \begin{pmatrix} \frac{\partial \bm{H}_1}{\partial \bm{\mu}} & \frac{\partial \bm{H}_1}{\partial \bm{\lambda}} \\ \frac{\partial \bm{H}_2}{\partial \bm{\mu}} & \frac{\partial \bm{H}_2}{\partial \bm{\lambda}}\end{pmatrix} = \begin{pmatrix} \text{diag} \left( \frac{1}{q_n} \frac{\partial g \left( \mu_n , x_n \right)}{\partial \mu_n} \right) & \bm{A}^T \\ \bm{A} & \bm{0}_{m \times m} \end{pmatrix}
+\end{equation*}
+
+and:
+
+\begin{equation*}
+D_{\bm{x} , \bm{y}} \bm{H} = \begin{pmatrix} \frac{\partial \bm{H}_1}{\partial \bm{x}} & \frac{\partial \bm{H}_1}{\partial \bm{y}} \\ \frac{\partial \bm{H}_2}{\partial \bm{x}} & \frac{\partial \bm{H}_2}{\partial \bm{y}}\end{pmatrix} = \begin{pmatrix} \text{diag} \left( \frac{1}{q_n} \frac{\partial g \left( \mu_n , x_n \right)}{\partial x_n} \right) & \bm{0}_{n \times m} \\ \bm{0}_{m \times n} & - \bm{I}_{m \times m} \end{pmatrix}
+\end{equation*}
+
+\subsection{Using Schulz's iterative method}
+
+From Ben-Israel, 1965. Let $\bm{\Phi}$ be an arbitrary (nonzero) complex $m \times n$ matrix of rank $r$ and let:
+
+\begin{equation*}
+\lambda_1 \left( \bm{\Phi} \bm{\Phi}^* \right) \geq \lambda_2 \left( \bm{\Phi} \bm{\Phi}^* \right) \geq \cdots \geq \lambda_r \left( \bm{\Phi} \bm{\Phi}^* \right)
+\end{equation*}
+
+denote the eigenvalues of $\bm{\Phi} \bm{\Phi}^*$. If the real scalar $\alpha$ satisfies:
+
+\begin{equation*}
+0 < \alpha < \frac{2}{\lambda_1 \left( \bm{\Phi} \bm{\Phi}^* \right)}
+\end{equation*}
+
+then the sequences defined by:
+
+\begin{align*}
+\bm{\Phi}_0 &= \alpha \bm{\Phi}^* \\
+\bm{\Phi}_{k + 1} &= \bm{\Phi}_k \left( 2 \bm{I} - \bm{\Phi} \bm{\Phi}_k \right)
+\end{align*}
+
+converges to $\bm{\Phi}^+$ as $k \rightarrow \infty$.
+
+\subsubsection{Application to raking problem with the Chi2 distance}
+
+We want to solve the system:
+
+\begin{align*}
+\frac{\mu_1}{q_1 x_1} + \bm{\lambda}^T \bm{A}_{.,1} &= \frac{1}{q_1} \\
+\cdots & \\
+\frac{\mu_N}{q_N x_N} + \bm{\lambda}^T \bm{A}_{.,N} &= \frac{1}{q_N} \\
+\bm{A}_{1,.}^T \bm{\mu} - y_1 &= 0 \\
+\cdots & \\
+\bm{A}_{M,.}^T \bm{\mu} - y_M &= 0
+\end{align*}
+
+which can be re-written as:
+
+\begin{equation*}
+\bm{\Phi} \begin{pmatrix} \bm{\mu} \\ \bm{\lambda} \end{pmatrix} = \begin{pmatrix} \frac{1}{\bm{q}} \\ \bm{y} \end{pmatrix}
+\end{equation*}
+
+with:
+
+\begin{equation*}
+\bm{\Phi} = \begin{pmatrix} \text{diag} \left( \frac{1}{\bm{q} \odot \bm{x}} \right) & \bm{A}^T \\ \bm{A} & \bm{0}_{M \times M} \end{pmatrix}
+\end{equation*}
+
+We can approximate the solution by:
+
+\begin{equation*}
+\begin{pmatrix} \bm{\mu} \\ \bm{\lambda} \end{pmatrix} = \bm{\Phi}^+ \begin{pmatrix} \frac{1}{\bm{q}} \\ \bm{y} \end{pmatrix} \text{ with } \bm{\Phi}^+ = \alpha \bm{\Phi}^* \left( 2 \bm{I}_{N M \times N M} - \alpha \bm{\Phi} \bm{\Phi}^* \right)
+\end{equation*}
+
+We get:
+
+\begin{align*}
+\bm{\phi}^+ &= 2 \alpha \begin{pmatrix} \text{diag} \left( \frac{1}{\bm{q} \odot \bm{x}} \right) & \bm{A}^T \\ \bm{A} & \bm{0}_{M \times M} \end{pmatrix} - \alpha^2 \begin{pmatrix} \text{diag} \left( \frac{1}{\bm{q} \odot \bm{x}} \right) & \bm{A}^T \\ \bm{A} & \bm{0}_{M \times M} \end{pmatrix} \begin{pmatrix} \text{diag} \left( \frac{1}{\bm{q} \odot \bm{x}} \right) & \bm{A}^T \\ \bm{A} & \bm{0}_{M \times M} \end{pmatrix} \begin{pmatrix} \text{diag} \left( \frac{1}{\bm{q} \odot \bm{x}} \right) & \bm{A}^T \\ \bm{A} & \bm{0}_{M \times M} \end{pmatrix} \\
+&= 2 \alpha \begin{pmatrix} \text{diag} \left( \frac{1}{\bm{q} \odot \bm{x}} \right) & \bm{A}^T \\ \bm{A} & \bm{0}_{M \times M} \end{pmatrix} \\
+&- \alpha^2 \begin{pmatrix} \text{diag} \left( \frac{1}{\bm{q}^{\odot 3} \odot \bm{x}^{\odot 3}} \right) + \bm{A}^T \bm{A} \text{diag} \left( \frac{1}{\bm{q} \odot \bm{x}} \right) + \text{diag} \left( \frac{1}{\bm{q} \odot \bm{x}} \right) \bm{A}^T \bm{A} & \text{diag} \left( \frac{1}{\bm{q}^{\odot 2} \odot \bm{x}^{\odot 2}} \right) \bm{A}^T + \bm{A}^T \bm{A} \bm{A}^T \\ \bm{A} \text{diag} \left( \frac{1}{\bm{q}^{\odot 2} \odot \bm{x}^{\odot 2}} \right) & \bm{0}_{M \times M} \end{pmatrix}
+\end{align*}
+
+which gives us:
+
+\begin{align*}
+\begin{pmatrix} \bm{\mu} \\ \bm{\lambda} \end{pmatrix} &= 2 \alpha \begin{pmatrix} \left( \frac{1}{\bm{q}^{\odot 2} \odot \bm{x}} \right) + \bm{A}^T \bm{y} \\ \bm{A} \left( \frac{1}{\bm{q}} \right) \end{pmatrix} \\
+&- \alpha^2 \begin{pmatrix} \left( \frac{1}{\bm{q}^{\odot 4} \odot \bm{x}^{\odot 3}} \right) + \bm{A}^T \bm{A} \left( \frac{1}{\bm{q}^{\odot 2} \bm{x}} \right) + \text{diag} \left( \frac{1}{\bm{q} \odot \bm{x}} \right) \bm{A}^T \bm{A} \left( \frac{1}{\bm{q}} \right) + \text{diag} \left( \frac{1}{\bm{q}^{\odot 2} \odot \bm{x}^{\odot 2}} \right) \bm{A}^T \bm{y} + \bm{A}^T \bm{A} \bm{A}^T \bm{y} \\ \bm{A} \left( \frac{1}{\bm{q}^{\odot 3} \odot \bm{x}^{\odot 2}} \right) \end{pmatrix}
+\end{align*}
+
+from which we finally get:
+
+\begin{equation*}
+\frac{\partial \bm{\mu}}{\partial \bm{y}} = 2 \alpha \bm{A}^T - \alpha^2 \left( \text{diag} \left( \frac{1}{\bm{q}^{\odot 2} \odot \bm{x}^{\odot 2}} \right) \bm{A}^T + \bm{A}^T \bm{A} \bm{A}^T \right)
+\end{equation*}
+
+and:
+
+\begin{align*}
+\frac{\partial \bm{\mu}}{\partial \bm{x}} &= - 2 \alpha \text{diag} \left( \frac{1}{\bm{q}^{\odot 2} \odot \bm{x}^{\odot 2}} \right) \\
+&- \alpha^2 \left( - 3 \text{diag} \left( \frac{1}{\bm{q}^{\odot 4} \odot \bm{x}^{\odot 4}} \right) - \bm{A}^T \bm{A} \text{diag} \left( \frac{1}{\bm{q}^{\odot 2} \odot \bm{x}^{\odot 2}} \right) - \text{diag} \left( \frac{1}{\bm{q} \odot \bm{x}^{\odot 2}} \odot \bm{A}^T \bm{A} \left( \frac{1}{\bm{q}} \right) \right) - 2 \text{diag} \left( \frac{1}{\bm{q}^{\odot 2} \odot \bm{x}^{\odot 3}} \odot \bm{A}^T \bm{y} \right) \right)
+\end{align*}
+
+\subsubsection{Application to raking problem with the entropic distance}
+
+At each step of the Newton's algorithm, we solve:
+
+\begin{equation*}
+\nabla \bm{H} \left(\bm{\mu}^k , \bm{\lambda}^k \right) \left[ \begin{pmatrix} \bm{\mu}^{k + 1} \\ \bm{\lambda}^{k + 1} \end{pmatrix} - \begin{pmatrix} \bm{\mu}^k \\ \bm{\lambda}^k \end{pmatrix} \right] = - \bm{H} \left( \bm{\mu}^k , \bm{\lambda}^k \right)
+\end{equation*}
+
+At step 0, we choose $\bm{\mu}^0 = \bm{x}$ and $\bm{\lambda}^0 = \bm{0}_M$, which gives us:
+
+\begin{align*}
+\begin{pmatrix} \bm{\mu}^1 \\ \bm{\lambda}^1 \end{pmatrix} &= \begin{pmatrix} \bm{x} \\ \bm{0}_M \end{pmatrix} - \left( \nabla \bm{H} \right)^+ \bm{H} \left( \bm{x} , \bm{0}_M \right) \\
+&= \begin{pmatrix} \bm{x} \\ \bm{0}_M \end{pmatrix} - \alpha \left( \nabla \bm{H} \right)^* \left[ 2 \bm{I}_{N M \times N M} - \alpha \left( \nabla \bm{H} \right) \left( \nabla \bm{H} \right)^* \right] \bm{H} \left( \bm{x} , \bm{0}_M \right)
+\end{align*}
+
+For the entropic distance, we have:
+
+\begin{equation*}
+\nabla \bm{H} \left( \bm{\mu} , \bm{\lambda} \right) = \begin{pmatrix} \text{diag} \left( \frac{1}{\bm{q} \odot \bm{\mu}} \right) & \bm{A}^T \\ \bm{A} & \bm{0}_{m \times m} \end{pmatrix}
+\end{equation*}
+
+and:
+
+\begin{equation*}
+\bm{H} \left( \bm{\mu} , \bm{\lambda} \right) = \begin{pmatrix} \frac{1}{\bm{q}} \odot \log \left( \frac{\bm{\mu}} {\bm{x}} \right) + \bm{A}^T \bm{\lambda} \\ \bm{A} \bm{\mu} - \bm{y} \end{pmatrix}
+\end{equation*}
+
+which gives for $\bm{\mu}^0 = \bm{x}$ and $\bm{\lambda}^0 = \bm{0}_M$:
+
+\begin{equation*}
+\nabla \bm{H} \left( \bm{x} , \bm{0}_M \right) = \begin{pmatrix} \text{diag} \left( \frac{1}{\bm{q} \odot \bm{x}} \right) & \bm{A}^T \\ \bm{A} & \bm{0}_{m \times m} \end{pmatrix}
+\end{equation*}
+
+and:
+
+\begin{equation*}
+\bm{H} \left( \bm{x} , \bm{0}_M \right) = \begin{pmatrix} \bm{0}_N \\ \bm{A} \bm{x} - \bm{y} \end{pmatrix}
+\end{equation*}
+
+Finally, we get:
+
+\begin{align*}
+\begin{pmatrix} \bm{\mu}^1 \\ \bm{\lambda}^1 \end{pmatrix} &= \begin{pmatrix} \bm{x} \\ \bm{0}_M \end{pmatrix} - 2 \alpha \begin{pmatrix} \bm{A}^T \bm{A} \bm{x} - \bm{A}^T \bm{y} \\ \bm{0}_M \end{pmatrix} \\
+&+ \alpha^2 \begin{pmatrix} \text{diag} \left( \frac{1}{\bm{q}^{\odot 2} \odot \bm{x}^{\odot 2}} \right) \bm{A}^T \bm{A} \bm{x} + \bm{A}^T \bm{A} \bm{A}^T \bm{A} \bm{x} - \text{diag} \left( \frac{1}{\bm{q}^{\odot 2} \odot \bm{x}^{\odot 2}} \right) \bm{A}^T \bm{y} - \bm{A}^T \bm{A} \bm{A}^T \bm{y} \\ \bm{A} \text{diag} \left( \frac{1}{\bm{q} \odot \bm{x}} \right) \bm{A}^T \bm{A} \bm{x} - \bm{A} \text{diag} \left( \frac{1}{\bm{q} \odot \bm{x}} \right) \bm{A}^T \bm{y} \end{pmatrix}
+\end{align*}
+
+which gives us:
+
+\begin{equation*}
+\frac{\partial \bm{\mu}^1}{\partial \bm{y}} = 2 \alpha \bm{A}^T - \alpha^2 \left( \text{diag} \left( \frac{1}{\bm{q}^{\odot 2} \odot \bm{x}^{\odot 2}} \right) \bm{A}^T + \bm{A}^T \bm{A} \bm{A}^T \right)
+\end{equation*}
+
+and:
+
+\begin{equation*}
+\frac{\partial \bm{\mu}^1}{\partial \bm{x}} = \bm{I}_{N \times N} - 2 \alpha \bm{A}^T \bm{A} + \alpha^2 \left( \left[ \left( -1 \right)^{i == j} \frac{ \left( \bm{A}^T \bm{A} \right)_{ij}}{q_i^2 x_i^2} \right] + \bm{A}^T \bm{A} \bm{A}^T \bm{A} + 2 \text{diag} \left( \frac{1}{\bm{q}^{\odot 2} \odot \bm{x}^{\odot 3}} \odot \bm{A}^T \bm{y} \right) \right)
+\end{equation*}
+
+\subsection{Other idea}
+
+This idea is taking from \cite{SI_2023}. The constraint in the raking problem is written as:
+
+\begin{equation*}
+\bm{A} \bm{\mu} = \bm{y}
+\end{equation*}
+
+where $\bm{A}$ is an $m * n$ matrix. If we denote $\bm{C}$ a basis of the null space of $\bm{A}$ and $d$ the dimension of the null space, then for any vector $\bm{t}$ of $\mathbb{R}^d$, we have:
+
+\begin{equation*}
+\bm{A} \bm{C} \bm{t} = \bm{0}
+\end{equation*}
+
+If $\hat{\bm{\mu}}$ is a solution of $\bm{A} \bm{\mu} = \bm{y}$, then $\hat{\bm{\mu}} + \bm{C} \bm{t}$ is also a solution. If we denote $P = \bm{C} \left( \bm{C}^T \bm{C} \right) ^{-1} \bm{C}^T$ the projection matrix of $\bm{C}$, then for any vector $\bm{v}$ of $\mathbb{R}^n$, we have:
+
+\begin{equation*}
+\bm{A} \bm{P} \bm{v} = \bm{0}
+\end{equation*}
+
+thus $\hat{\bm{\mu}} + \bm{P} \bm{v}$ is also a solution of the constraint.
+
+If we denote:
+
+\begin{equation*}
+h \left( \bm{x} \right) = \lambda \mu + \sum_i f_i^* \left( - v_i \lambda \right) = \lambda \mu + \sum_i x_i \left( 1 + \alpha q_i v_i \lambda \right) ^{\frac{1}{\alpha}}
+\end{equation*}
+
+and $\lambda^*$ the solution of $\min_{\lambda} h \left( \bm{x} \right)$, we have:
+
+\begin{equation*}
+h \left( \bm{x} + \bm{dx} \right) = h \left( \bm{x} \right) + \nabla h \left( \bm{x} \right) ^T \bm{dx} + \frac{1}{2} \bm{dx} ^T H \left( \bm{dx} \right) \bm{dx}
+\end{equation*}
+
+\section{Application}
+
+We can think of two ways of doing the workflow. Let us denote $x_{i,j,k}$ and $\mu_{i,j,k}$ the initial values and the raked values for cause $i$, race $j$ and county $k$. We suppose that:
+\begin{itemize}
+    \item $i = 0$ represents all causes while $i = 1 , \cdots , I$ represent the level-1 causes.
+    \item $j = 0$ represents all races while $j = 1 , \cdots , J$ represent the J different races or ethnicities.
+    \item $k = 0$ represents the state value while $k = 1 , \cdots , K$ represent the counties values.
+\end{itemize}
+
+$\mu_{0,0,0}$ and $\mu_{i,0,0}, i = 1 , \cdots , I$ are known from the GBD. As it is currently implemented by the USHD team, we have four steps for the raking:
+
+\begin{itemize}
+    \item Step 1: Minimize $\sum_{k = 1}^K G \left( \mu_{0,0,k} , x_{0,0,k} \right)$ under the constraint $\sum_{k = 1}^K \mu_{0,0,k} = \mu_{0,0,0}$.
+    \item Step 2: Minimize $\sum_{i = 1}^I \sum_{k = 1}^K G \left( \mu_{i,0,k} , x_{i,0,k} \right)$ under the constraints $\sum_{k = 1}^K \mu_{i,0,k} = \mu_{i,0,0}$ for all $i = 1 , \cdots , I$ and $\sum_{i = 1}^I \mu_{i,0,k} = \mu_{0,0,k}$ for all $k = 1, \cdots , K$.
+    \item Step 3: For all $k = 1 , \cdots , K$, minimize $\sum_{j = 1}^J G \left( \mu_{0,j,k} , x_{0,j,k} \right)$ under the constraint $\sum_{j = 1}^J \mu_{0,j,k} = \mu_{0,0,k}$.
+    \item Step 4: For all $k = 1 , \cdots , K$, minimize $\sum_{i = 1}^I \sum_{j = 1}^J G \left( \mu_{i,j,k} , x_{i,j,k} \right)$ under the constraints $\sum_{i = 1}^I \mu_{i,j,k} = \mu_{0,j,k}$ for all $j = 1 , \cdots , J$ and $\sum_{j = 1}^J \mu_{i,j,k} = \mu_{i,0,k}$ for all $i = 1 , \cdots , I$.
+\end{itemize}
+We can also do it all at once by looking for the raked values minimizing:
+
+\begin{equation*}
+\sum_{k = 1}^K G \left( \mu_{0,0,k} , x_{0,0,k} \right) + \sum_{i = 1}^I \sum_{k = 1}^K G \left( \mu_{i,0,k} , x_{i,0,k} \right) + \sum_{k = 1}^K \sum_{j = 1}^J G \left( \mu_{0,j,k} , x_{0,j,k} \right) + \sum_{k = 1}^K \sum_{i = 1}^I \sum_{j = 1}^J G \left( \mu_{i,j,k} , x_{i,j,k} \right)
+\end{equation*}
+
+under the constraints:
+
+\begin{align*}
+& \sum_{k = 1}^K \mu_{0,0,k} = \mu_{0,0,0} \\
+& \sum_{k = 1}^K \mu_{i,0,k} = \mu_{i,0,0} \text{ for } i = 1 , \cdots , I \\
+& \sum_{i = 1}^I \mu_{i,0,k} - \mu_{0,0,k} = 0 \text{ for } k = 1 , \cdots , K \\
+& \sum_{j = 1}^J \mu_{0,j,k} - \mu_{0,0,k} = 0 \text{ for } k = 1 , \cdots , K \\
+& \sum_{i = 1}^I \mu_{i,j,k} - \mu_{0,j,k} = 0 \text{ for } j = 1 , \cdots , J \text{ and } k = 1 , \cdots , K\\
+& \sum_{j = 1}^J \mu_{i,j,k} - \mu_{i,0,k} = 0 \text{ for } i = 1 , \cdots , I  \text{ and } k = 1 , \cdots , K
+\end{align*}
+
+\subsection{Additional notes}
+
+Consider the full 3D problem with single dimensional constraints: 
+\[
+\begin{aligned}
+\min_\mu &\sum_{i,j,k} G \left( \mu_{i,j,k} , x_{i,j,k} \right) \\
+\mbox{s.t.}  & \sum_{j,k} \mu_{i,j,k} = \mu_{i,0,0} \text{ for } i = 1 , \cdots , I
+\end{aligned}
+\]
+
+This problem will satisfy consistency with GBD results but may fail to have internal consistency. When raking under a single set of constraints, there is no reason other patterns should be preserved. 
+
+Currently the team preserves the patterns that should be consistent. To understand the problem, we first consider a 2D simple case. 
+
+Consider
+\[
+\min_M \sum_{i,j} G(\mu_{i,j}, x_{i,j}) \quad  \mbox{s.t.} \quad 
+M 1 = r_c. 
+\]
+A priori there is no reason why the original structure in $X$ should be preserved. To preserve it, we could actually add a constraint that all column sums are proportional to the original column sums (this assumes cross-entropy for $G$): 
+\[
+\begin{aligned}
+\min_M &  \sum_{i,j} G(\mu_{i,j}, x_{i,j})  \\
+\mbox{s.t.} & \quad M 1 = r_c \\
+            & \quad 1^TM = c 1^TX.
+\end{aligned}
+\]
+Moreover we can easily solve for the constant, since we have to have 
+\[
+1^TM1 = 1^Tr_c = c 1^TX1 \quad \Rightarrow \quad c = \frac{1^Tr_c}{1^TX1}
+\]
+This gives us the problem 
+\[
+\begin{aligned}
+\min_M &  \sum_{i,j} G(\mu_{i,j}, x_{i,j})  \\
+\mbox{s.t.} & \quad M 1 = r \\
+            & \quad 1^TM = \frac{1^Tr_c}{1^TX1} 1^TX.
+\end{aligned}
+\]
+However this makes sense only if we are assuming that $G$ is the cross-entropy loss, so that `consistent' really means proportional. 
+
+Otherwise, following through on the previous proposal, we would solve the following: 
+\[
+\begin{aligned}
+\min_{c, M} &\sum_i G(c, 1^TX_{\cdot, i}) + \sum_{i,j} G(\mu_{i,j}, x_{i,j})\\
+\mbox{s.t.} & \quad 1^Tc = 1^Tr\\ 
+& \quad M 1 = r \\
+& \quad 1^T M = c 
+\end{aligned}
+\]
+This is a simple example of the full problem posed above. 
+
+\subsection{Current implementation}
+
+The current code to do the raking is located here: \href{https://stash.ihme.washington.edu/projects/LSAE/repos/sae.shared/browse/R/rake.r}{Current raking functions}. \\
+
+In 1D, the rate is multiplied by the population, then the raking ratio is computed by dividing the total number of deaths by the sum of deaths over all locations. The raked values are obtained by multiplying the initial values with the raking ratio. We verify on a small example that we obtain the same raking ratios using the \href{https://stash.ihme.washington.edu/projects/LSAE/repos/sae.shared/browse/R/rake.r}{current raking function} from the LSAE team and using our own raking function implementing Equation 1. The Python script is located \href{https://github.com/ADucellierIHME/raking_1Dtoy/blob/main/compare_with_current_raking_function.py}{here}.
+
+\vspace{1em}
+
+In 2D, the 1D raking is done alternatively between the two dimensions until convergence. We verify on a small example that we obtain the same raking ratios using the \href{https://stash.ihme.washington.edu/projects/LSAE/repos/sae.shared/browse/R/rake.r}{current raking function} from the LSAE team and using our own raking function implementing Equations 2 and 3. The Python script is located \href{https://github.com/ADucellierIHME/raking_IPF/blob/main/compare_with_current_raking_function.py}{here}.
+
+\bibliography{bibliography}
+
+\end{document}
